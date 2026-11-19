@@ -1,0 +1,3911 @@
+function varargout = GUI(varargin)
+% GUI MATLAB code for GUI.fig
+%      GUI, by itself, creates a new GUI or raises the existing
+%      singleton*.
+%
+%      H = GUI returns the handle to a new GUI or the handle to
+%      the existing singleton*.
+%
+%      GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in GUI.M with the given input arguments.
+%
+%      GUI('Property','Value',...) creates a new GUI or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before GUI_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to GUI_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help GUI
+
+% Last Modified by GUIDE v2.5 01-Feb-2021 15:38:05
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @GUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @GUI_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before GUI is made visible.
+function GUI_OpeningFcn(hObject, ~, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to GUI (see VARARGIN)
+
+% Choose default command line output for GUI
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes GUI wait for user response (see UIRESUME)
+% uiwait(handles.main_window);
+
+
+% --- Outputs from this function are returned to the command line
+function varargout = GUI_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on selection change in camera_select.
+function camera_select_Callback(hObject, ~, handles)
+% hObject    handle to camera_select (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns camera_select contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from camera_select
+
+
+% --- Executes during object creation, after setting all properties.
+function camera_select_CreateFcn(hObject, ~, handles)
+% hObject    handle to camera_select (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','grey');
+end
+
+
+% --- Executes on slider movement.
+function gain_slider_Callback(hObject, eventdata, handles)
+% hObject    handle to gain_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)process
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine rangeprocess of slider
+running = str2double(get(handles.livetime,'string'));
+
+if running == 0
+    %open_camera();
+    a = update_preview(hObject,eventdata,handles);
+%     gain_boost = get(handles.gainboost,'value');
+%     %authenticate the exposure slider.
+%     exposure_val = exposures();
+%     old_exposure = get(handles.exposure,'Value');
+%     if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     else
+%         set(handles.exposure,'Value',exposure_val(1));
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     end
+%     exposure_new = get(handles.exposure,'value');
+% 
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+% 
+%     % select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+%     %display it
+%     axes(handles.camera_preview);
+%     imshow(frame);
+end
+%update the handles structure
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function gain_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gain_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in save_exit_button.
+function save_exit_button_Callback(hObject, eventdata, handles)
+% hObject    handle to save_exit_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%close the gui
+close(handles.main_window);
+
+
+
+
+
+% --- Executes on button press in save_capture_button.
+function save_capture_button_Callback(hObject, eventdata, handles)
+% hObject    handle to save_capture_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in capture_button.
+function capture_button_Callback(hObject, eventdata, handles)
+% hObject    handle to capture_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%stop any live preview
+if str2double(get(handles.livetime,'string'))
+    set(handles.livetime,'string','0');
+    pause(0.5);
+end
+
+%get path to save to
+savepath = get(handles.savepath,'string');
+if strcmp(savepath,'Enter save path here')
+    errordlg('Please choose where to capture this video to using the box on the left','Cannot Start Capture');
+    return
+end
+
+%try and enforce some naming convention....
+try
+    str2doublr(savepath(end-5));
+catch
+    savepath = strcat(savepath(1:end-4),'0','.avi');
+end
+
+a = 0;
+b = 0;
+while a == 0
+    try
+        imread(strcat(savepath(1:end-5),num2str(b+1),'.avi'));
+    catch
+        savepath = strcat(savepath(1:end-5),num2str(b),'.avi');
+        a = 1;
+    end
+    b = b + 1;
+end
+
+%read framerate into number.
+framerate_string = get(handles.framerate_menu,'string');
+framerate_value = get(handles.framerate_menu,'value');
+if framerate_value == 0
+    errordlg('Please choose a framerate and try again','Error! Framerate not set');
+    return
+end
+framerate = string2framerate(framerate_string,framerate_value);
+
+%read capture duration into number
+capture_string = get(handles.capture_duration,'string');
+capture_value = get(handles.capture_duration,'value');
+if capture_value == 0
+    errordlg('Please choose a duration and try again','Error! Duration not set');
+    return
+end
+duration = string2duration(capture_string,capture_value);
+
+%and then work out how many frames need to be captured
+frames = round(duration * framerate);
+
+%get other capture data
+gainboost = get(handles.gainboost,'value');
+gain = get(handles.gain_slider,'value');
+
+
+exposure_val = exposures();
+old_exposure = get(handles.exposure,'value');
+exposure = old_exposure;
+if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+    %set(handles.exposure,'Min',exposure_val(1));
+    %set(handles.exposure,'Max',exposure_val(2));
+    %set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+else
+    %set(handles.exposure,'Value',exposure_val(1));
+    %set(handles.exposure,'Min',exposure_val(1));
+    %set(handles.exposure,'Max',exposure_val(2));
+    %set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+    exposure = exposure_val(2);
+end
+%exposure = get(handles.exposure,'value');
+
+%disable capture botton to prevent duplicate mex function calls
+%set(handles.capture_button,'Enable','off');
+
+%AOI settings
+if get(handles.limit_roi_checkbox,'value') == 1
+    if strcmp('Left',get(handles.left_roi_limit,'string'))
+        return
+    else
+        leftaoi = round(str2double(get(handles.left_roi_limit,'string')));
+    end
+    if strcmp('Right',get(handles.right_roi_limit,'string'))
+        return
+    else
+        rightaoi = round(str2double(get(handles.right_roi_limit,'string')));
+    end
+    if strcmp('Top',get(handles.top_roi_limit,'string'))
+        return
+    else
+        topaoi = round(str2double(get(handles.top_roi_limit,'string')));
+    end
+    if strcmp('Bottom',get(handles.bottom_roi_limit,'string'))
+        return
+    else
+        bottomaoi = round(str2double(get(handles.bottom_roi_limit,'string')));
+    end
+    xstart = leftaoi;
+    ystart = topaoi;
+    width = abs(leftaoi-rightaoi);
+    height = abs(topaoi-bottomaoi);
+    %and validate the values to ensure they're compatible with the camera
+    valid = validate_aoi(xstart,ystart,width,height);
+    xstart = valid{1};
+    ystart = valid{2};
+    width = valid{3};
+    height = valid{4};
+    
+else
+    xstart = 1;
+    ystart = 1;
+    width = 0;
+    height = 0;
+end
+
+%select the colour settings
+grayscale = get(handles.mono_button,'value');
+
+if ~get(handles.ssd,'value')
+    %send the capture command
+    nCap = ueye_capture_video(gainboost,gain,framerate,frames,exposure,savepath,xstart,ystart,width,height,grayscale);
+else
+    nCap = ueye_capture_video_SSD(gainboost,gain,framerate,frames,exposure,savepath,xstart,ystart,width,height,grayscale);
+    
+end
+if nCap ~=0;
+    errordlg('There was an error capturing your video. Check your settings and try again','Capture Error');
+    set(handles.capture_button,'Enable','on');
+    return
+end
+
+%re-enable capture button
+set(handles.capture_button,'Enable','on');
+
+%update handles structure
+guidata(hObject,handles)
+
+
+
+
+
+
+
+
+
+%convert the video once captured into a string of .tif files
+% vid_path = get(handles.savepath,'string');
+% set(handles.pathbox,'string',vid_path);
+% avitif(vid_path)
+
+% --- Executes on button press in process_button.
+function process_button_Callback(hObject, ~, handles)
+% hObject    handle to process_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%set button off to prevent multiple queueing or execution.
+set(handles.process_button,'enable','off')
+set(handles.popout_anal,'visible','off');
+
+
+
+%choose what file to analyse
+if get(handles.use_last_captured_button,'value') == 0
+    vid_path = get(handles.pathbox,'string');
+else
+    vid_path = get(handles.savepath,'string');
+    set(handles.pathbox,'string',vid_path);
+end
+
+%set minimum steps counter in the output to be the same as the processing
+set(handles.minsteps2,'string',get(handles.minsteps_box,'string'));
+
+%pull values for image pre-processing from the sliders
+img_switches = zeros(3,1);
+img_switches(1) = get(handles.denoise_box,'value');
+img_switches(2) = get(handles.disc,'value');
+img_switches(3) = get(handles.blur_box,'value');
+
+img_params = zeros(3,1);
+img_params(1) = get(handles.background,'value');
+img_params(2) = get(handles.background_disk,'value');
+img_params(3) = get(handles.blur,'value');
+
+%define water viscosity table for allowed temperature range
+viscwater = [0,0.0079;
+    1,0.00173;
+    2,0.00167;
+    3,0.00162;
+    4,0.00157;
+    5,0.00152;
+    6,0.00147;
+    7,0.00143;
+    8,0.00138;
+    9,0.00134;
+    10,0.00131;
+    11,0.00127;
+    12,0.00123;
+    13,0.0012;
+    14,0.00117;
+    15,0.00114;
+    16,0.00111;
+    17,0.00108;
+    18,0.00105;
+    19,0.00103;
+    20,0.001;
+    21,0.000978;
+    22,0.000954;
+    23,0.000932;
+    24,0.000911;
+    25,0.00089;
+    26,0.00087;
+    27,0.000851;
+    28,0.000832;
+    29,0.000815;
+    30,0.000797];
+
+%get the viscosity
+if get(handles.water,'value') == 1
+    if str2double(get(handles.water_temp,'string')) == 0
+        viscosity = 0.001; %assume 293K if unspecified
+        temp = 293;
+    elseif str2double(get(handles.water_temp,'string')) >303 %warn of temperature over 30 celsius
+        errordlg('This is too high a temperature to reliably measure on this equipment. It will not produce accurate results!','Too hot!')
+        viscosity = 0.000797; %default to value for 30 celsius
+        temp = 303;
+    elseif str2double(get(handles.water_temp,'string')) < 273
+        tempq = questdlg('This temperature makes no physical sense for water. Did you give this temperature in Celsius by mistake?','Conversion error');
+        if strcmp(tempq,'Yes')
+            temp = str2double(get(handles.water_temp,'string')) + 273;
+            viscosity = viscwater(temp-272,2);
+            set(handles.water_temp,'string',num2str(temp));
+        elseif strcmp(tempq,'No')
+            errordlg('The viscosity lookup has no thundvalues in this range for the viscosity of water. They will assume you have water at 273k','Too cold!')
+            viscosity = 0.00173;
+            temp = 273;
+            set(handles.water_temp,'string',num2str(temp));
+        else
+            set(handles.process_button,'enable','on')
+            guidata(hObject,handles);
+            return
+        end
+    else
+        temp = round(str2double(get(handles.water_temp,'string')));
+        viscosity = viscwater(temp-272,2);
+    end
+else
+    viscosity = str2double(get(handles.other_viscosity,'string'));
+end
+
+%choose how much of it to analyse. Only convert what is needed
+if get(handles.contiguous_analysis_button,'value') == 1
+    %avitif(vid_path,'n',0,img_switches,img_params);
+    
+    %this must be sensitive to the kind of file being analysed...
+    readpath = get(handles.pathbox,'string');
+    if strcmp(readpath(end-2:end),'avi')
+        obj = VideoReader(get(handles.pathbox,'string'));
+        max_frames = obj.NumberOfFrames;
+        mediatype = 'avi';
+    elseif strcmp(readpath(end-2:end),'ids')
+        while ~strcmp(readpath(end),'/')
+            readpath = readpath(1:end-1);
+        end
+        currentdir = pwd;
+        cd(readpath);
+        filelist = dir('image*');
+        max_frames = length(filelist)-1;
+        cd(currentdir);
+        mediatype = 'ids';
+    end
+else
+    max_frames = str2double(get(handles.batch_size,'string'));
+    %avitif(vid_path,'y',max_frames,img_switches,img_params);
+end
+
+% %denoise the images
+% progressbar('De-noising video...');
+% 
+% for i = 1 : max_frames
+%     img = imread(strcat('frame',num2str(i),'.tif'));
+%     if get(handles.denoise_box,'value')
+%         img = img - get(handles.background,'value');
+%         img = img*(255/get(handles.background,'value'));
+%     end
+%     if get(handles.disc,'value')
+%         radius = round(get(handles.background_disk,'value'));
+%         se = strel('disk',radius);
+%         img = imtophat(img,se);
+%     end
+%     if get(handles.blur_box,'value')
+%         sigma = get(handles.blur,'value');
+%         G = fspecial('gaussian',[round(sigma/2) round(sigma/2)],sigma);
+%         img = imfilter(img,G,'same');
+%     end
+%     imwrite(img,strcat('frame',num2str(i),'.tif'));
+%     progressbar(i/max_frames);
+% end
+
+
+%blur the images
+
+
+%read analysis parameters from input boxes
+minsteps = str2double(get(handles.minsteps_box,'string'));
+sterr = str2double(get(handles.maxerr_box,'string'));
+pxptch = str2double(get(handles.custom_pixel_box,'string'));
+% if get(handles.contiguous_analysis_button,'value') == 0
+%     frames = str2double(get(handles.batch_size,'string'));
+% else
+%     obj = VideoReader(get(handles.pathbox,'string'));
+%     frames = obj.NumberOfFrames;
+% end
+
+frames = max_frames;
+
+% start of the debug line to check the file extension 19/11/2026
+if ~isfield(handles, 'mediatype')
+    handles.mediatype = [];
+    guidata(hObject, handles);
+end
+%mediatype = handles.mediatype;
+
+fprintf('mediatype = %s\n', mediatype)
+% end of the debug line to check the file extension 19/11/2026
+%set video framerate
+if strcmp(mediatype,'avi')
+    path = get(handles.pathbox,'string');
+    obj = VideoReader(path);
+    framerate = obj.FrameRate;
+elseif strcmp(mediatype,'ids')
+    %framerate = str2double(get(handles.pathbox,'string'));
+    path = get(handles.pathbox,'string');
+    %fclose all; %please work!
+
+    try %try opening the new data file
+        newpath = strcat(path(1:end-10),'capturedata.mtlb');
+        newfile = fopen(newpath,'r');
+        frameratecell = textscan(newfile,'%f%1c',1);
+        framerate = frameratecell{1};
+        fclose(newfile);
+        delete(newpath);
+        newfile2 = fopen(newpath,'w');
+        fprintf(newfile2,'%f',framerate);
+        fprintf(newfile2,'%s',';');
+        fclose(newfile2);
+    catch %if it doesn't exist, then read the old one and make a new one!
+        newpath = strcat(path(1:end-10),'capturedata.mtlb');
+        fid = fopen(strcat(path(1:end-10),'capturedata.mdf'),'r');
+        framerate = fscanf(fid,'%f');
+        fclose(fid);
+        newfile = fopen(newpath,'w');
+        for iteration = 1 : 1000
+            fprintf(newfile,'%f',framerate);
+            fprintf(newfile,'%s',';');
+        end
+        fclose(newfile);
+    end
+    
+else
+    errordlg('Something went wrong when reading the framerate - no datatype was successfully set');
+    return
+end
+%errordlg(strcat('framerate is',num2str(framerate)));
+%get detection parameters
+detection_params = zeros(3,1);
+detection_params(1) = get(handles.glob_slide,'value');
+detection_params(2) = get(handles.cutoff_slide,'value');
+detection_params(3) = get(handles.thresh_slide,'value');
+
+%get the step length
+step_length = round(get(handles.step_length_slide,'value'));
+
+%do the time-consuming donkeywork
+[first_matrix] = input_transformer(path,1,frames,50,img_switches,img_params,detection_params,step_length);
+csvwrite('first_matrix.csv',first_matrix);
+
+%fix the frame numbers in the second column
+first_matrix = columnfixer(first_matrix);
+csvwrite('first_matrix_fixed.csv',first_matrix);
+
+%columns 3 and 4 of 'first matrix' are then the x and y co-ordinates of
+%each particle, the particle ID numbers are contained in column 1. This
+%needs to have an optional drift correction applied to it. Column 5 should
+%be the intensity.
+
+%test it
+%disp(first_matrix);
+
+drifty = [];
+driftx = [];
+if get(handles.drift,'value');
+   %apply drift correction...
+   %Work out how many frames
+   number_of_frames = max(first_matrix(:,2));
+   disp('number of frames');
+   disp(number_of_frames);
+   row_index = 1;
+   avpos = zeros(number_of_frames,2);
+   particle_index = 0;
+   xcounter = 0;
+   ycounter = 0;
+   
+   %try writing this again...
+   max_frames = max(first_matrix(:,2));
+   rows = length(first_matrix(:,1));
+   framepos = {};
+   framepos{max_frames} = [];
+   for current_frame = 1 : max_frames
+       for current_row = 1 : rows
+           if first_matrix(current_row,2) == current_frame
+               framepos{current_frame} = [framepos{current_frame}; first_matrix(current_row,3) first_matrix(current_row,4)];
+               %framepos now holds each of the particles, sorted by frame.
+               %Each frame may now be averaged to obtain a sensible
+               %average.
+           end
+       end
+   end
+   avpos = zeros(max_frames,2);
+   for current_frame = 1 : max_frames
+       if ~isempty(framepos{current_frame})
+           avpos(current_frame,1) = mean(framepos{current_frame}(:,1));
+           avpos(current_frame,2) = mean(framepos{current_frame}(:,2));
+       else
+           avpos(current_frame,1) = 640;
+           avpos(current_frame,2) = 512;
+       end
+   end
+   
+%    This next commented block is probably incorrect.
+   
+   
+%    for current_frame = 1 : number_of_frames
+% %        disp(first_matrix);
+% %        disp(row_index);
+%        while first_matrix(row_index,2) == current_frame
+%            xcounter = xcounter + first_matrix(row_index,3);
+%            ycounter = ycounter + first_matrix(row_index,4);
+%            particle_index = particle_index + 1;
+%            row_index = row_index + 1;
+%        end
+%        avpos(current_frame,1) = xcounter/particle_index;
+%        avpos(current_frame,2) = ycounter/particle_index;
+%        %disp('particle_index');
+%        %disp(particle_index);
+%        ycounter = 0;
+%        xcounter = 0;
+%        particle_index = 0;
+%        %disp('avpos');
+%        %disp(avpos);
+%    end
+   %now avpos contains the average particle positions in each frame of
+   %video.
+   
+   %the next step is to calculate the mean drift between each pair of
+   %frames.
+   mean_drift = zeros(length(avpos(:,1))-1,2);
+   for transition = 1 : length(mean_drift)
+       mean_drift(transition,1) = avpos(transition + 1,1) - avpos(transition,1);
+       mean_drift(transition,2) = avpos(transition + 1,2) - avpos(transition,2);
+   end
+   %mean_drift now contains the mean x and mean y drift between each pair
+   %of frames. In most cases, the x drift can be ignored, since the
+   %troublesome convection should only be affecting the drift in the y
+   %direction.
+   
+   %disp(mean_drift);
+   
+   %these numbers now need to be put into driftx and drifty for passing to
+   %later functions...
+   drifty = zeros(length(mean_drift(:,1)),1);
+   driftx = drifty;
+   for i = 1 : length(mean_drift(:,1))
+       driftx(i) = mean_drift(i,1);
+       drifty(i) = mean_drift(i,2);
+   end
+   
+   %account for preferences in single-direction correction...
+   if ~get(handles.xcorrect,'value')
+       driftx = [];
+   end
+   if ~get(handles.ycorrect,'value')
+       drifty = [];
+   end
+   
+   
+   %there is probably an easier means of accomplishing this, as it means
+   %that if 'use drift correction' is selected, it adds significant
+   %computational time to the analysis, even if neither of the directions
+   %are selected to no drift correction actually takes place. This may be
+   %accounted for at a later date...
+end
+
+
+
+
+%raw_matrix = accuracy(first_matrix,minsteps,sterr,framerate);
+
+%'accuracy' and all subroutines therein are now part of a new function called
+%'compound'. This makes debugging more elegant, and also allows for dynamic
+%changes to be made in the track lengths to correct for drift of particles.
+
+%if both driftx and drifty are empty arrays, then no drift correction will occur.
+raw_matrix = compound(first_matrix,framerate,minsteps,sterr,driftx,drifty); %5th column is intensity
+disp(framerate);
+%test it
+%disp(raw_matrix);
+fidtest = fopen('raw_matrix.file','w');
+fprintf(fidtest,'%f',raw_matrix);
+fclose(fidtest);
+
+size_matrix = sizecor(raw_matrix,pxptch);
+csvwrite('first_matrix.csv',first_matrix);
+csvwrite('raw_matrix.csv',raw_matrix);
+csvwrite('size_matrix.csv',size_matrix);
+
+
+%and splurge the two matrices together, replacing arbitrary path lengths
+%with pixel-size corrected values
+full_matrix = zeros(length(size_matrix(:,1)),4);%4th column for intensity
+for i = 1 : length(size_matrix(:,1))
+    full_matrix(i,1) = size_matrix(i,1);
+    full_matrix(i,2) = size_matrix(i,2);
+    full_matrix(i,3) = raw_matrix(i,3);
+    full_matrix(i,4) = raw_matrix(i,5);
+end
+
+%just_matrix=full_matrix;
+%csvwrite('just_matrix.csv',just_matrix);
+
+
+%replace pixel-corrected values with corresponding radii
+for z = 1 : length(full_matrix(:,1))
+    temporary = full_matrix(z,1);
+    full_matrix(z,1) = stokes_einstein(temp,full_matrix(z,1),viscosity);%this needs fixing for nanometers, not meters.
+    full_matrix(z,2) = (full_matrix(z,2)/temporary)*full_matrix(z,1);
+end
+
+%strip out particles smaller than minimum expected
+min_size = str2double(get(handles.min_particle_size,'string'));
+len = length(full_matrix); %makes things easier later
+for t = 1 : length(full_matrix)-1
+    if full_matrix(len-t+1,1)<(min_size/(10^9)) %make it nanometres
+        full_matrix(len-t+1,:) = [];
+    end
+end
+
+csvwrite('full_matrix.csv',full_matrix);
+
+fidtest = fopen('full_matrix.file','w');
+fprintf(fidtest,'%f',full_matrix);
+fclose(fidtest);
+
+%test it...
+%disp(full_matrix);
+csvwrite('full_matrix.csv',full_matrix);
+
+%write output data to csv file
+[filename,pathname,filter] = uiputfile('.csv');
+% fileID = fopen(strcat(pathname,filename),'wt');
+% for p = 1 : length(full_matrix(:,1))
+%     fprintf(fileID,'\n%d,%d,%d,%d',full_matrix(p,:));
+% end
+% fclose(fileID);
+csvwrite(strcat(pathname,filename),full_matrix);
+%this leaves an output of columns size, standard error, and track length
+
+%and set this path to be the default .csv file location for the output
+%section
+set(handles.output_path,'string',strcat(pathname,filename));
+
+%delete video files from scratch directory
+% for q = 1 : frames
+%     delete(strcat('frame',num2str(q),'.tif'));
+% end
+
+%and do an automatic plot of the output data in the output window
+histogram_auto = autohist(full_matrix(:,1));
+bar(handles.output_histogram,histogram_auto(:,1),histogram_auto(:,2));
+set(handles.process_button,'enable','on')
+
+%set the high-pass in the output section to 
+set(handles.bottom_trim_box,'string',get(handles.min_particle_size,'string'));
+
+%calculate the mean size
+mean_size = mean(size_matrix(:,1));
+
+%and display it
+set(handles.mean_size,'string',strcat('Mean size is: ',num2str(round(mean_size)),'nm'));
+
+%get the refractive index
+m = str2double(get(handles.refractive,'string'));
+
+%pass first_matrix to something that sorts out the particle eccentricity
+%data
+%shp = get(handles.shape,'value')
+if get(handles.shape,'value')
+    %set (handles.text40,'String',shp);
+    shape = real(eccentricity(first_matrix,m,mean_size));%mean_size is the mean size is ensemble = 0, array otherwise. Ensemble is 0 for yes, 1 for no
+   
+    %display the calculated shape
+    shape_string = 'Shape parameters a and b are:';
+if shape(1,1) ~= 0
+    shape_string = strcat(shape_string,' ',num2str(shape(1,1)),', ',num2str(shape(1,2)));
+end
+if shape(2,1) ~= 0
+    shape_string = strcat(shape_string,'; ',num2str(shape(2,1)),', ',num2str(shape(2,2)));
+end
+if shape(3,1) ~= 0
+    shape_string = strcat(shape_string,'; ',num2str(shape(3,1)),', ',num2str(shape(3,2)));
+end
+if shape(4,1) ~= 0
+    shape_string = strcat(shape_string,'; ',num2str(shape(4,1)),', ',num2str(shape(4,2)));
+end
+if strcmp('Shape parameters a and b are:',shape_string)
+    shape_string = 'There was an unexpected error calculating the shape.';
+end
+set(handles.shape_is,'string',shape_string);
+end
+
+ 
+
+
+
+
+
+%remove this file...
+try
+    %delete('framerate.nanodata');
+catch
+end
+
+guidata(hObject,handles);
+
+
+
+% --- Executes on selection change in capture_duration.
+function capture_duration_Callback(hObject, eventdata, handles)
+% hObject    handle to capture_duration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns capture_duration contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from capture_duration
+
+
+% --- Executes during object creation, after setting all properties.
+function capture_duration_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to capture_duration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in framerate_menu.
+function framerate_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to framerate_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns framerate_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from framerate_menu
+
+
+% --- Executes during object creation, after setting all properties.
+function framerate_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to framerate_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in limit_area_checkbox.
+function limit_area_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to limit_area_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of limit_area_checkbox
+
+
+% --- Executes on button press in limit_roi_checkbox.
+function limit_roi_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to limit_roi_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of limit_roi_checkbox
+
+running = str2double(get(handles.livetime,'string'));
+
+if running == 0
+
+%     gain_boost = get(handles.gainboost,'value');
+    %open_camera()
+    a = update_preview(hObject,eventdata,handles);
+%     %authenticate the exposure slider.
+%     exposure_val = exposures();
+%     old_exposure = get(handles.exposure,'Value');
+%     if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     else
+%         set(handles.exposure,'Value',exposure_val(1));
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     end
+% 
+%     %make sure the exposure has been set
+%     exposure_new = get(handles.exposure,'value');
+% 
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+% 
+%     % select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+%     %display it
+%     axes(handles.camera_preview);
+%     imshow(frame);
+end
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+function left_roi_limit_Callback(hObject, eventdata, handles)
+% hObject    handle to left_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of left_roi_limit as text
+%        str2double(get(hObject,'String')) returns contents of left_roi_limit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function left_roi_limit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to left_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function right_roi_limit_Callback(hObject, eventdata, handles)
+% hObject    handle to right_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of right_roi_limit as text
+%        str2double(get(hObject,'String')) returns contents of right_roi_limit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function right_roi_limit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to right_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function top_roi_limit_Callback(hObject, eventdata, handles)
+% hObject    handle to top_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of top_roi_limit as text
+%        str2double(get(hObject,'String')) returns contents of top_roi_limit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function top_roi_limit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to top_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function bottom_roi_limit_Callback(hObject, eventdata, handles)
+% hObject    handle to bottom_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of bottom_roi_limit as text
+%        str2double(get(hObject,'String')) returns contents of bottom_roi_limit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function bottom_roi_limit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bottom_roi_limit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in min_track_length_popup.
+function min_track_length_popup_Callback(hObject, eventdata, handles)
+% hObject    handle to min_track_length_popup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns min_track_length_popup contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from min_track_length_popup
+
+
+% --- Executes during object creation, after setting all properties.
+function min_track_length_popup_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to min_track_length_popup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in max_standard_error.
+function max_standard_error_Callback(hObject, eventdata, handles)
+% hObject    handle to max_standard_error (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns max_standard_error contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from max_standard_error
+
+
+% --- Executes during object creation, after setting all properties.
+function max_standard_error_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to max_standard_error (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in open_file_button.
+function open_file_button_Callback(hObject, eventdata, handles)
+% hObject    handle to open_file_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function minsteps_box_Callback(hObject, eventdata, handles)
+% hObject    handle to minsteps_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minsteps_box as text
+%        str2double(get(hObject,'String')) returns contents of minsteps_box as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minsteps_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minsteps_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxerr_box_Callback(hObject, eventdata, handles)
+% hObject    handle to maxerr_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxerr_box as text
+%        str2double(get(hObject,'String')) returns contents of maxerr_box as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxerr_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxerr_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function custom_pixel_box_Callback(hObject, eventdata, handles)
+% hObject    handle to custom_pixel_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of custom_pixel_box as text
+%        str2double(get(hObject,'String')) returns contents of custom_pixel_box as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function custom_pixel_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to custom_pixel_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function min_particle_size_Callback(hObject, eventdata, handles)
+% hObject    handle to min_particle_size (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% Hints: get(hObject,'String') returns contents of min_particle_size as text
+%        str2double(get(hObject,'String')) returns contents of min_particle_size as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function min_particle_size_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to min_particle_size (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function batch_size_Callback(hObject, eventdata, handles)
+% hObject    handle to batch_size (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of batch_size as text
+%        str2double(get(hObject,'String')) returns contents of batch_size as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function batch_size_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to batch_size (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in batch_analysis.
+function batch_analysis_Callback(hObject, eventdata, handles)
+% hObject    handle to batch_analysis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of batch_analysis
+
+
+% --- Executes during object creation, after setting all properties.
+function contiguous_group_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to contiguous_group (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object deletion, before destroying properties.
+function contiguous_group_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to contiguous_group (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes when selected object is changed in contiguous_group.
+function contiguous_group_SelectionChangeFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in contiguous_group 
+% eventdata  structure with the following fields (see UIBUTTONGROUP)
+%	EventName: string 'SelectionChanged' (read only)
+%	OldValue: handle of the previously selected object or empty if none was selected
+%	NewValue: handle of the currently selected object
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function pathbox_Callback(hObject, eventdata, handles)
+% hObject    handle to pathbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pathbox as text
+%        str2double(get(hObject,'String')) returns contents of pathbox as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pathbox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pathbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in select_file.
+function select_file_Callback(hObject, eventdata, handles)
+% hObject    handle to select_file (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+
+
+[filename,filepathname,filter] = uigetfile({'*.avi;*.ids','Readable video files'});
+set(handles.pathbox,'string',strcat(filepathname,filename));
+try
+    path = str2double(get(handles.pathbox,'string'));
+    if path == 0
+        set(handles.pathbox,'string','Enter path here (please)');
+    else
+        set(handles.popoutanal,'visible','on');
+    end
+catch
+end
+
+%work out whether it's an .avi video or an .ids datafile
+datafile = get(handles.pathbox,'string');
+if strcmp(datafile(end),'i') %this is a fragile way to detect avi extension
+    % define mediatype explicitly for use in processing 19/11/2026
+    set(handles.pathbox,'string',strcat(filepathname,filename));
+    % end of 19/11/2026 correction
+    %read video file
+    obj = VideoReader(get(handles.pathbox,'string'));
+    vid = read(obj,1);
+
+    %set parameters on stepthrough slider
+    set(handles.position,'value',1);
+    set(handles.position,'min',1);
+    set(handles.position,'max',obj.NumberOfFrames);
+
+
+    %set parameters on blur slider
+    set(handles.blur,'value',1);
+    set(handles.blur,'min',1);
+    set(handles.blur,'max',20);
+
+% frames = obj.NumberOfFrames;
+% set(handles.position,'max',frames);
+% set(handles.position,'min',1);
+
+    img = image_cleanup(hObject,handles);
+
+    %generate initial preview
+    axes(handles.camera_preview);
+    %imshow(vid(:,:,:,1),[]);
+    imshow(img);
+else
+    %get the directory the files are stored in
+    newdir = datafile;
+    while ~strcmp(newdir(end),'/')
+        newdir = newdir(1:end-1);
+    end
+    
+    %open the first image
+    %img = imread(strcat(newdir,'image0.tif'));
+    
+    %work out how many images
+    workingdir = pwd;
+    cd(newdir);
+    filelist = dir('image*');
+    cd(workingdir);
+    framecount = length(filelist)-1;
+    
+    %make a cell array linking the frame numbers to the filenames
+%     framenumber = 1 : framecount;
+%     frameindex{1} = framenumber;
+%     frameindex{2} = [];
+%     filenumber = 0 : framecount-1;
+%     for k = 1 : framecount
+%         frameindex{2}(end+1) = strcat('image',num2str(filenumber(k)),'.tif');
+%     end
+    
+    %set parameters on stepthrough slider
+    set(handles.position,'value',1);
+    set(handles.position,'min',1);
+    set(handles.position,'max',framecount);
+
+
+    %set parameters on blur slider
+    set(handles.blur,'value',1);
+    set(handles.blur,'min',1);
+    set(handles.blur,'max',20);
+    
+    img = image_cleanup(hObject,handles);
+    axes(handles.camera_preview);
+    imshow(img);
+end
+
+set(handles.popout_anal,'visible','on');
+
+guidata(hObject,handles);
+
+
+
+function edit11_Callback(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit11 as text
+%        str2double(get(hObject,'String')) returns contents of edit11 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function savepath_Callback(hObject, eventdata, handles)
+% hObject    handle to savepath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of savepath as text
+%        str2double(get(hObject,'String')) returns contents of savepath as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function savepath_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to savepath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in savepath_button.
+function savepath_button_Callback(hObject, eventdata, handles)
+% hObject    handle to savepath_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename,filepathname,filter] = uiputfile('.avi');
+set(handles.savepath,'string',strcat(filepathname,filename));
+try
+    path = str2double(get(handles.savepath,'string'));
+    if path == 0
+        set(handles.savepath,'string','Enter path here (please)');
+    end
+catch
+    path = 1;
+end
+
+guidata(hObject,handles);
+
+
+
+function cust_hist_bin_val_Callback(hObject, eventdata, handles)
+% hObject    handle to cust_hist_bin_val (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of cust_hist_bin_val as text
+%        str2double(get(hObject,'String')) returns contents of cust_hist_bin_val as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function cust_hist_bin_val_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cust_hist_bin_val (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in plot_replot.
+function plot_replot_Callback(hObject, eventdata, handles)
+% hObject    handle to plot_replot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%This gets annoying when files don't exist...
+%set(handles.plot_replot,'enable','off');
+
+datafile = get(handles.output_path,'string');
+data = csvread(datafile);
+
+%make sure that any lines of spreadsheet with NaN or inf are removed.
+data = remove_invalid(data);
+
+% %trim the data as required
+top_trim = get(handles.top_trim_checkbox,'value');
+if top_trim
+    max_allowed = str2double(get(handles.top_trim_box,'string'))/(10^9);
+    if max_allowed == 0
+        errordlg('please specify an upper particle size limit!','Trimming error!');
+    end
+   len = length(data(:,1));
+    for i = 1 : len
+        if data(len-i+1,1) > max_allowed
+            data(len-i+1,:) = [];
+        end
+    end
+%     i = 1;
+%     while i <= length(data(:,1))
+%         if data(i,1) > max_allowed
+%             data(i,:) = [];
+%             i = i-1;
+%         end
+%         i = i+1;
+%     end
+end
+
+bottom_trim = get(handles.bottom_trim_checkbox,'value');
+if bottom_trim
+    min_allowed = str2double(get(handles.bottom_trim_box,'string'))/(10^9);
+    if min_allowed == 0
+        errordlg('please specify a lower particle size limit!','Trimming error!');
+    end
+    len = length(data(:,1));
+    for i = 1 : len
+        if data(len-i+1,1) < min_allowed
+            data(len-i+1,:) = [];
+        end
+    end
+end
+
+%control for minimum track length
+minsteps = str2double(get(handles.minsteps2,'string'));
+len = length(data(:,1));
+for i = 1 : len
+    if data(len-i+1,3) < minsteps
+        data(len-i+1,:) = [];
+    end
+end
+
+%get plot type (straight histogram or guassian-weighted curve)
+plot_type = get(handles.dist_smooth,'value');
+
+%basic histogram plot
+if plot_type == 0
+    %calculate histogram binning
+    if get(handles.auto_hist_bin,'value') == 0
+        nbins = str2double(get(handles.cust_hist_bin_val,'string'));
+        if nbins == 0 %make sure a value has been entered
+            errordlg('You need to select a number of bins','Histogram Error!');
+            set(handles.plot_replot,'enable','on');
+            guidata(hObject,handles);
+            return
+        end
+        [nelements,centres] = hist(data(:,1),nbins);
+        plot_data = zeros(length(nelements),2);
+        plot_data(:,1) = centres;
+        plot_data(:,2) = nelements;
+    else
+        plot_data = autohist(data(:,1));
+    end
+end
+
+%nice smoothed-out guassian plot, 1nm bins
+if plot_type == 1
+    plot_data = gaussian_plot(data);    
+end
+
+%check plot data is sensible
+if length(plot_data(:,1)) < 3
+    errordlg('For some reason, your plotting settings are incompatible with your current data. Please choose different settings and replot.','Histogram Error!');
+    set(handles.plot_replot,'enable','on');
+    guidata(hObject,handles);
+    return
+end
+
+%plot it
+if plot_type == 0
+    bar(handles.output_histogram,plot_data(:,1),plot_data(:,2));
+end
+
+%plot smoothed gaussian version.
+if plot_type == 1
+    if get(handles.top_trim_checkbox,'value')
+        plot_max = str2double(get(handles.top_trim_box,'string'));
+        if plot_max < length(plot_data(:,1))
+            for i = plot_max : length(plot_data(:,1))-1
+                plot_data(plot_max+1,:) = [];
+            end
+        end
+    end
+    if get(handles.bottom_trim_checkbox,'value')
+        plot_min = str2double(get(handles.bottom_trim_box,'string'));
+        for i = 1 : plot_min
+            plot_data(1,:) = [];
+        end
+    end
+    plot(handles.output_histogram,plot_data(:,1),plot_data(:,2));
+end
+
+
+
+%decide whether to look for peaks
+if str2double(get(handles.peak_count,'string')) ~= 0
+    %check that there's sufficient data to find this many peaks
+    if str2double(get(handles.cust_hist_bin_val,'string')) ~= 0
+        if str2double(get(handles.peak_count,'string')) >= str2double(get(handles.cust_hist_bin_val,'string'))
+            if get(handles.cust_hist_bin,'value')
+                errordlg('You are looking for too many peaks!','Peak finding error!')
+                set(handles.plot_replot,'enable','on');
+                guidata(hObject,handles);
+                return
+            end
+        end
+    end
+    if str2double(get(handles.peak_count,'string')) >= length(data(:,1))/10
+        errordlg('You are looking for too many peaks!','Peak finding error!')
+        set(handles.plot_replot,'enable','on');
+        guidata(hObject,handles);
+        return
+    end
+    peaks = zeros(str2double(get(handles.peak_count,'string')),2); %2 columns, location and height
+    peaks = pkfind(plot_data,peaks,str2double(get(handles.peak_count,'string')));
+    %add first particle
+    set(handles.peaks_detected,'string',strcat(num2str(round(peaks(1,1)*10^9)),' nm, ',num2str(peaks(1,2)),' particles'));
+    %and the rest if necessary
+    string = {strcat(num2str(round(peaks(1,1)*(10^9))),' nm, ',num2str(peaks(1,2)),' particles')};
+    if str2double(get(handles.peak_count,'string')) > 1
+        for peak = 2 : str2double(get(handles.peak_count,'string'))
+            %write the output
+            string{end+1} = strcat(num2str(round(peaks(peak,1)*(10^9))),' nm, ',num2str(peaks(peak,2)),' particles');
+            set(handles.peaks_detected,'string',string);
+        end
+    end
+else
+   set(handles.peaks_detected,'string','Choose a number of peaks to find!');
+end
+
+%add something to calculate the mean size within the selected range and
+%standard deviation/standard error.
+if ~plot_type %for bar chart
+    %stats for bar histogram
+    %first column of plot_data is size, second is count...
+    
+    %mean first
+    output_sum = 0;
+    for bin = 1 : length(plot_data(:,1))
+        output_sum = output_sum + (plot_data(bin,1)*plot_data(bin,2)); %sum all bins
+    end
+    output_mean = output_sum/sum(plot_data(:,2)); %divide by datapoints
+    set(handles.mean_size,'string',strcat('Mean size is: ',num2str(round(output_mean*(10^9),2)),'nm')); %and display it
+    
+    %then stdev
+    set(handles.stdev,'string',strcat('Standard deviation is: ',num2str(round(std(plot_data(:,1),plot_data(:,2))*(10^9),2)),'nm'));
+    
+    %then sterr
+    stdev = std(plot_data(:,1),plot_data(:,2));
+    sterr = stdev/(sqrt(sum(plot_data(:,2))));
+    set(handles.sterr,'string',strcat('Standard error is: ',num2str(round(sterr*(10^9),2)),'nm'));
+    
+    %particle count is easy!
+    set(handles.partnum,'string',strcat('Particle count is: ',num2str(sum(plot_data(:,2)))));
+    
+elseif plot_type %for smoothed gaussian
+    %stats for gaussian
+    %first column of plot_data is size, second is count...
+    
+    %mean first
+    output_sum = 0;
+    for bin = 1 : length(plot_data(:,1))
+        output_sum = output_sum + (plot_data(bin,1)*plot_data(bin,2)); %sum all bins
+    end
+    output_mean = output_sum/length(plot_data(:,1)); %divide by datapoints
+    set(handles.mean_size,'string',strcat('Mean size is: ',num2str(round(output_mean*(10^9),2)),'nm')); %and display it
+    
+    %then stdev
+    set(handles.stdev,'string',strcat('Standard deviation is: ',num2str(round(std(plot_data(:,1),plot_data(:,2))*(10^9),2)),'nm'));
+    
+    %then sterr
+    stdev = std(plot_data(:,1),plot_data(:,2));
+    sterr = stdev/(sqrt(sum(plot_data(:,2))));
+    set(handles.sterr,'string',strcat('Standard error is: ',num2str(round(sterr*(10^9),2)),'nm')); %which is wrong as it incorrectly accounts for the number of particles.
+    
+    %particle count is easy!
+    set(handles.partnum,'string',strcat('Particle count is: ',num2str(sum(plot_data(:,2))))); %this is actually wrong, it gives the number of datapoints used in the smoothed distribution!
+else
+    errordlg('Something is wrong with the universe - this shouldn''t be accessible code if 1~=0');
+end
+
+set(handles.plot_replot,'enable','on');
+
+%update handles structure
+guidata(hObject,handles);
+
+
+% --- Executes on button press in top_trim_checkbox.
+function top_trim_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to top_trim_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of top_trim_checkbox
+
+
+% --- Executes on button press in bottom_trim_checkbox.
+function bottom_trim_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to bottom_trim_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of bottom_trim_checkbox
+
+
+
+function top_trim_box_Callback(hObject, eventdata, handles)
+% hObject    handle to top_trim_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of top_trim_box as text
+%        str2double(get(hObject,'String')) returns contents of top_trim_box as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function top_trim_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to top_trim_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function bottom_trim_box_Callback(hObject, eventdata, handles)
+% hObject    handle to bottom_trim_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of bottom_trim_box as text
+%        str2double(get(hObject,'String')) returns contents of bottom_trim_box as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function bottom_trim_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bottom_trim_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function output_path_Callback(hObject, eventdata, handles)
+% hObject    handle to output_path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of output_path as text
+%        str2double(get(hObject,'String')) returns contents of output_path as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function output_path_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to output_path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in datapath_button.
+function datapath_button_Callback(hObject, eventdata, handles)
+% hObject    handle to datapath_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[filename,pathname,filter] = uigetfile('.csv');
+set(handles.output_path,'string',strcat(pathname,filename));
+
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function auto_hist_bin_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to auto_hist_bin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+
+function water_temp_Callback(hObject, eventdata, handles)
+% hObject    handle to water_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of water_temp as text
+%        str2double(get(hObject,'String')) returns contents of water_temp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function water_temp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to water_temp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function other_viscosity_Callback(hObject, eventdata, handles)
+% hObject    handle to other_viscosity (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of other_viscosity as text
+%        str2double(get(hObject,'String')) returns contents of other_viscosity as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function other_viscosity_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to other_viscosity (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function stepthrough_slider_Callback(hObject, eventdata, handles)
+% hObject    handle to stepthrough_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+%I genuinely have no idea what this snippet does, I think it may have been
+%accidentally orphaned, but I'm not sufficiently confident to delete it,
+%and exhaustively testing the code with it commented out to see if it makes
+%any difference is just a massive faff...
+
+
+obj = VideoReader(get(handles.pathbox,'string'));
+vid = read(obj);
+image_frac = str2double(get(handles.stepthrough_slider,'value'));
+image = round(image_frac*length(vid(1,1,1,:)));
+
+axes(handles.camera_preview);
+imshow(vid(:,:,:,image),[]);
+
+guidata(hObject,handles)
+
+
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function stepthrough_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to stepthrough_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+function minsteps2_Callback(hObject, eventdata, handles)
+% hObject    handle to minsteps2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minsteps2 as text
+%        str2double(get(hObject,'String')) returns contents of minsteps2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minsteps2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minsteps2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function peak_count_Callback(hObject, eventdata, handles)
+% hObject    handle to peak_count (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of peak_count as text
+%        str2double(get(hObject,'String')) returns contents of peak_count as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function peak_count_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to peak_count (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in peaks_detected.
+function peaks_detected_Callback(hObject, eventdata, handles)
+% hObject    handle to peaks_detected (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns peaks_detected contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from peaks_detected
+
+
+% --- Executes during object creation, after setting all properties.
+function peaks_detected_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to peaks_detected (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function position_Callback(hObject, eventdata, handles)
+% hObject    handle to position (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+%casual slider to skim through the video in preview mode
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+
+
+%and update handles structure
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function position_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to position (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function background_Callback(hObject, eventdata, handles)
+% hObject    handle to background (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+%write value of slider to numeric field
+set(handles.comp_num,'string',num2str(get(handles.background,'value')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update handles structure
+guidata(hObject,handles);
+
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function background_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to background (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function blur_Callback(hObject, eventdata, handles)
+% hObject    handle to blur (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+%write value of slider to numeric field
+set(handles.blur_num,'string',num2str(get(handles.blur,'value')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function blur_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to blur (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in blur_box.
+function blur_box_Callback(hObject, eventdata, handles)
+% hObject    handle to blur_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of blur_box
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes on button press in denoise_box.
+function denoise_box_Callback(hObject, eventdata, handles)
+% hObject    handle to denoise_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of denoise_box
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+% --- Executes on slider movement.
+function background_disk_Callback(hObject, eventdata, handles)
+% hObject    handle to background_disk (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+%write value of slider to numeric field
+set(handles.disc_num,'string',num2str(get(handles.background_disk,'value')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%and update handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function background_disk_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to background_disk (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in disc.
+function disc_Callback(hObject, eventdata, handles)
+% hObject    handle to disc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of disc
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+% --- Executes on slider movement.
+function glob_slide_Callback(hObject, eventdata, handles)
+% hObject    handle to glob_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+value = get(handles.glob_slide,'value');
+set(handles.glob_num,'string',num2str(value));
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function glob_slide_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to glob_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+
+
+function glob_num_Callback(hObject, eventdata, handles)
+% hObject    handle to glob_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of glob_num as text
+%        str2double(get(hObject,'String')) returns contents of glob_num as a double
+
+
+%set the slider to the same value  as the box
+%set slider to box value
+max = get(handles.glob_slide,'max');
+min = get(handles.glob_slide,'min');
+val = str2double(get(handles.glob_num,'string'));
+if val>max
+    val = max;
+    set(handles.glob_num,'string',num2str(val));
+elseif val<min
+    val = min;
+    set(handles.glob_num,'string',num2str(val));
+end
+set(handles.glob_slide,'value',val);
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+
+
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function glob_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to glob_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function disc_num_Callback(hObject, eventdata, handles)
+% hObject    handle to disc_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of disc_num as text
+%        str2double(get(hObject,'String')) returns contents of disc_num as a double
+
+
+%write value of box to slider
+set(handles.background_disk,'value',str2double(get(handles.disc_num,'string')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function disc_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to disc_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function comp_num_Callback(hObject, eventdata, handles)
+% hObject    handle to comp_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of comp_num as text
+%        str2double(get(hObject,'String')) returns contents of comp_num as a double
+
+%write value of box to slider
+set(handles.background,'value',str2double(get(handles.comp_num,'string')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function comp_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to comp_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function blur_num_Callback(hObject, eventdata, handles)
+% hObject    handle to blur_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of blur_num as text
+%        str2double(get(hObject,'String')) returns contents of blur_num as a double
+
+
+%write value of box to slider
+set(handles.blur,'value',str2double(get(handles.blur_num,'string')));
+
+img = image_cleanup(hObject,handles);
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function blur_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to blur_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function cutoff_slide_Callback(hObject, eventdata, handles)
+% hObject    handle to cutoff_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+%set box to same value as slider
+set(handles.cutoff_num,'string',num2str(get(handles.cutoff_slide,'value')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+guidata(hObject,handles);
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function cutoff_slide_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cutoff_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+function cutoff_num_Callback(hObject, eventdata, handles)
+% hObject    handle to cutoff_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of cutoff_num as text
+%        str2double(get(hObject,'String')) returns contents of cutoff_num as a double
+
+%set slider to box value
+max = get(handles.cutoff_slide,'max');
+min = get(handles.cutoff_slide,'min');
+val = str2double(get(handles.cutoff_num,'string'));
+if val>max
+    val = max;
+    set(handles.cutoff_num,'string',num2str(val));
+elseif val<min
+    val = min;
+    set(handles.cutoff_num,'string',num2str(val));
+end
+set(handles.cutoff_slide,'value',val);
+
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+
+
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function cutoff_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cutoff_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function thresh_slide_Callback(hObject, eventdata, handles)
+% hObject    handle to thresh_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+%set box to slider
+set(handles.intensity_num,'string',num2str(get(handles.thresh_slide,'value')));
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+guidata(hObject,handles);
+
+
+
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function thresh_slide_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thresh_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+function intensity_num_Callback(hObject, eventdata, handles)
+% hObject    handle to intensity_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of intensity_num as text
+%        str2double(get(hObject,'String')) returns contents of intensity_num as a double
+
+%set slider to box
+max = get(handles.thresh_slide,'max');
+min = get(handles.thresh_slide,'min');
+val = str2double(get(handles.intensity_num,'string'));
+if val>max
+    val = max;
+    set(handles.intensity_num,'string',num2str(val));
+elseif val<min
+    val = min;
+    set(handles.intensity_num,'string',num2str(val));
+end
+set(handles.thresh_slide,'value',val);
+
+
+img = image_cleanup(hObject,handles);
+
+%display it
+axes(handles.camera_preview);
+imshow(img);
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function intensity_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to intensity_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in preview.
+function preview_Callback(hObject, eventdata, handles)
+% hObject    handle to preview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%get the running variable
+running = str2double(get(handles.livetime,'string'));
+
+
+%make sure that the live preview isn't running. If it is, exit
+if ~running
+    %open_camera();
+    a = update_preview(hObject,eventdata,handles);
+end
+
+guidata(hObject,handles);
+
+% 
+% if running == 0
+%     %open_camera()
+%     gain_boost = get(handles.gainboost,'value');
+%     %authenticate the exposure slider.
+%     exposure_val = exposures();
+%     old_exposure = get(handles.exposure,'Value');
+%     if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     else
+%         set(handles.exposure,'Value',exposure_val(1));
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     end
+% 
+%     %make sure the exposure has been set
+%     exposure_new = get(handles.exposure,'value');
+%     %set_new_exposure(exposure_new);
+% 
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+% 
+% 
+%     % select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+% 
+%     %display it
+%     axes(handles.camera_preview);
+%     imshow(frame);
+% end
+% %update the handles structure
+% guidata(hObject,handles);
+
+
+% --- Executes on slider movement.
+function exposure_Callback(hObject, eventdata, handles)
+% hObject    handle to exposure (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+running = str2double(get(handles.livetime,'string'));
+
+if running == 0
+
+%     gain_boost = get(handles.gainboost,'value');
+    %open_camera()
+    a = update_preview(hObject,eventdata,handles);
+%     %authenticate the exposure slider.
+%     exposure_val = exposures();
+%     old_exposure = get(handles.exposure,'Value');
+%     if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     else
+%         set(handles.exposure,'Value',exposure_val(1));
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     end
+% 
+%     %make sure the exposure has been set
+%     exposure_new = get(handles.exposure,'value');
+% 
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+% 
+%     % select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+%     %display it
+%     axes(handles.camera_preview);
+%     imshow(frame);
+end
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function exposure_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to exposure (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in live.
+function live_Callback(hObject, eventdata, handles)
+% hObject    handle to live (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%this is very hacky. It exits with an error when an actual recording is
+%started, as it's call on the camera gets shorted out.
+
+%this doesn't let you change the capture settings during the looping
+%either, it is purely for changing a hardware config (eg focus, sample
+%position etc)
+
+%allow the live view to be popped out...
+set(handles.popout,'visible','on');
+
+%get time to loop for
+%open_camera();
+running = 1;
+set(handles.livetime,'string',num2str(1));  
+%gain_boost = get(handles.gainboost,'value');    
+%authenticate the exposure slider.
+% exposure_val = exposures();
+% old_exposure = get(handles.exposure,'Value');
+% if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%     set(handles.exposure,'Min',exposure_val(1));
+%     set(handles.exposure,'Max',exposure_val(2));
+%     set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+% else
+%     set(handles.exposure,'Value',exposure_val(1));
+%     set(handles.exposure,'Min',exposure_val(1));
+%     set(handles.exposure,'Max',exposure_val(2));
+%     set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+% end
+    
+%make sure the exposure has been set
+%exposure_new = get(handles.exposure,'value');
+%set_new_exposure(exposure_new);
+
+%gain_val = round(get(handles.gain_slider,'value'));
+%pause on
+% axes(handles.camera_preview);
+while running
+    running = str2double(get(handles.livetime,'string'));
+    a = update_preview(hObject,eventdata,handles);
+%     gain_boost = get(handles.gainboost,'value');
+%     exposure_new = get(handles.exposure,'value');
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+%     running = str2double(get(handles.livetime,'string'));
+%     %display it
+%     
+%     %select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+%     axes(handles.camera_preview);
+%     imshow(frame);
+    guidata(hObject,handles);
+    %pause(0.5);
+end
+    
+set(handles.livetime,'string',num2str(0));    
+    
+
+guidata(hObject,handles);
+
+function livetime_Callback(hObject, eventdata, handles)
+% hObject    handle to livetime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of livetime as text
+%        str2double(get(hObject,'String')) returns contents of livetime as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function livetime_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to livetime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in stoplive.
+function stoplive_Callback(hObject, eventdata, handles)
+% hObject    handle to stoplive (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.popout,'visible','off');
+set(handles.livetime,'string',num2str(0));    
+    
+
+guidata(hObject,handles);
+
+
+% --- Executes on button press in gainboost.
+function gainboost_Callback(hObject, eventdata, handles)
+% hObject    handle to gainboost (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of gainboost
+running = str2double(get(handles.livetime,'string'));
+
+if running == 0
+%     gain_boost = get(handles.gainboost,'value');
+    %open_camera()
+    a = update_preview(hObject,eventdata,handles);
+%     %authenticate the exposure slider.
+%     exposure_val = exposures();
+%     old_exposure = get(handles.exposure,'Value');
+%     if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     else
+%         set(handles.exposure,'Value',exposure_val(1));
+%         set(handles.exposure,'Min',exposure_val(1));
+%         set(handles.exposure,'Max',exposure_val(2));
+%         set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+%     end
+% 
+%     %make sure the exposure has been set
+%     exposure_new = get(handles.exposure,'value');
+% 
+%     gain_val = round(get(handles.gain_slider,'value'));
+%     frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+% 
+% 
+%     % select colour
+%     colour_select = get(handles.colour_button,'value');
+%     if colour_select == 0
+%         frame = rgb2gray(frame);
+%     end
+% 
+%     %display it
+%     axes(handles.camera_preview);
+%     imshow(frame);
+end
+%update the handles structure
+guidata(hObject,handles);
+
+
+% --- Executes when selected object is changed in colour_select_box.
+function colour_select_box_SelectionChangeFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in colour_select_box 
+% eventdata  structure with the following fields (see UIBUTTONGROUP)
+%	EventName: string 'SelectionChanged' (read only)
+%	OldValue: handle of the previously selected object or empty if none was selected
+%	NewValue: handle of the currently selected object
+% handles    structure with handles and user data (see GUIDATA)
+
+gain_boost = get(handles.gainboost,'value');
+%open_camera()
+%authenticate the exposure slider.
+exposure_val = exposures();
+old_exposure = get(handles.exposure,'Value');
+if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+    set(handles.exposure,'Min',exposure_val(1));
+    set(handles.exposure,'Max',exposure_val(2));
+    set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+else
+    set(handles.exposure,'Value',exposure_val(1));
+    set(handles.exposure,'Min',exposure_val(1));
+    set(handles.exposure,'Max',exposure_val(2));
+    set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+end
+    
+%make sure the exposure has been set
+exposure_new = get(handles.exposure,'value');
+
+gain_val = round(get(handles.gain_slider,'value'));
+frame = get_still(1,0,3,gain_boost,gain_val,exposure_new);
+
+% select colour
+colour_select = get(handles.colour_button,'value');
+if colour_select == 0
+    frame = rgb2gray(frame);
+end
+
+%display it
+axes(handles.camera_preview);
+imshow(frame);
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function capture_button_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to capture_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes when selected object is changed in input_selection_panel.
+function input_selection_panel_SelectionChangeFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in input_selection_panel 
+% eventdata  structure with the following fields (see UIBUTTONGROUP)
+%	EventName: string 'SelectionChanged' (read only)
+%	OldValue: handle of the previously selected object or empty if none was selected
+%	NewValue: handle of the currently selected object
+% handles    structure with handles and user data (see GUIDATA)
+
+%get value of save path.
+savepath = get(handles.savepath,'string');
+
+%get current analysis file path
+analysispath = get(handles.pathbox,'string');
+
+%and decide what to do based on other GUI elements - I have no idea how to
+%use knowledge of what type of event this is...
+if strcmp('Enter path here',analysispath) == 1
+    set(handles.pathbox,'string',savepath);
+elseif strcmp(savepath,'Enter save path here')
+    errordlg('You cannot use the most recently captured data until some data has been captured!','Error!');
+elseif strcmp(savepath,analysispath) == 1
+    set(handles.pathbox,'string','Enter path here');
+else
+    set(handles.pathbox,'string',savepath);
+end
+    
+
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function preview_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to preview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+%open_camera();   %modified 19/11/2026, replaced by the following codes
+try
+    open_camera();
+catch
+    mainFig = ancestor(hObject, 'figure');
+    figure(mainFig);
+    d = warndlg('The camera function is not available', 'Camera unavilable', 'modal');
+    movegui(d, "center");
+    uiwait(d);
+
+    figure(mainFig)
+end 
+% end of 19/11/2026 modification
+guidata(hObject,handles);
+
+
+% --- Executes on button press in snapshot.
+function snapshot_Callback(hObject, eventdata, handles)
+% hObject    handle to snapshot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%make sure that live mode is disabled.
+if str2double(get(handles.livetime,'string')) == 1
+    set(handles.livetime,'string','0');
+    %and ensure that the last capture process has had time to exit
+    pause(0.5)
+end
+
+%get savepath for video
+savepath = get(handles.savepath,'string');
+
+%check that a savepath has been selected
+if strcmp(savepath,'Enter save path here')
+    errordlg('Please select a filename','Filename error!');
+    return;
+end
+
+%remove avi extension and replace it with tif for uncompressed image.
+savepath = strcat(savepath(1:end-4),'0.tif');
+
+%check if there's an image file with that name already there. If there is,
+%start a numbering convention. For very large numbers, this can get quite
+%slow, but it avoids overwriting if the program is restarted and then
+%captures more snapshots with the same filestub.
+a = 0;
+b = 0;
+while a == 0
+    try
+        imread(strcat(savepath(1:end-5),num2str(b),'.tif'));
+    catch
+        savepath = strcat(savepath(1:end-5),num2str(b),'.tif');
+        a = 1;
+    end
+    b = b + 1;
+end
+
+
+%get capture pearameters from GUI
+gain_boost = get(handles.gainboost,'value');
+gain_val = round(get(handles.gain_slider,'value'));
+exposure_val = exposures();
+old_exposure = get(handles.exposure,'Value');
+if and(old_exposure > exposure_val(1), old_exposure < exposure_val(2))
+%     set(handles.exposure,'Min',exposure_val(1));
+%     set(handles.exposure,'Max',exposure_val(2));
+%     set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+else
+    set(handles.exposure,'Value',exposure_val(1));
+%     set(handles.exposure,'Min',exposure_val(1));
+%     set(handles.exposure,'Max',exposure_val(2));
+%     set(handles.exposure,'SliderStep',[exposure_val(3) exposure_val(3)]);
+end
+exposure_new = get(handles.exposure,'value');
+
+%get area of interest data
+if get(handles.limit_roi_checkbox,'value')
+    if strcmp('Left',get(handles.left_roi_limit,'string'))
+        
+        return
+    else
+        leftaoi = round(str2double(get(handles.left_roi_limit,'string')));
+    end
+    if strcmp('Right',get(handles.right_roi_limit,'string'))
+        
+        return
+    else
+        rightaoi = round(str2double(get(handles.right_roi_limit,'string')));
+    end
+    if strcmp('Top',get(handles.top_roi_limit,'string'))
+        
+        return
+    else
+        topaoi = round(str2double(get(handles.top_roi_limit,'string')));
+    end
+    if strcmp('Bottom',get(handles.bottom_roi_limit,'string'))
+        
+        return
+    else
+        bottomaoi = round(str2double(get(handles.bottom_roi_limit,'string')));
+    end
+    xstart = leftaoi;
+    ystart = topaoi;
+    width = abs(leftaoi-rightaoi);
+    height = abs(topaoi-bottomaoi);
+    %and validate the values to ensure they're compatible with the camera
+    valid = validate_aoi(xstart,ystart,width,height);
+    xstart = valid{1};
+    ystart = valid{2};
+    width = valid{3};
+    height = valid{4};
+    
+else
+    xstart = 1;
+    ystart = 1;
+    width = 0;
+    height = 0;
+end
+
+%capture frame from camera
+frame = get_snapshot(1,0,3,gain_boost,gain_val,exposure_new,xstart,ystart,width,height);
+
+%select colour
+if ~get(handles.colour_button,'value')
+    frame = rgb2gray(frame);
+end
+
+imwrite(frame,savepath);
+
+%re-enable capture button
+set(handles.capture_button,'Enable','on');
+
+
+
+
+
+
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function main_window_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to main_window (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in dist_smooth.
+function dist_smooth_Callback(hObject, eventdata, handles)
+% hObject    handle to dist_smooth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of dist_smooth
+
+
+% --- Executes on slider movement.
+function step_length_slide_Callback(hObject, eventdata, handles)
+% hObject    handle to step_length_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+len = get(handles.step_length_slide,'value');
+set(handles.step_length_box,'string',num2str(len));
+
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function step_length_slide_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to step_length_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+function step_length_box_Callback(hObject, eventdata, handles)
+% hObject    handle to step_length_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of step_length_box as text
+%        str2double(get(hObject,'String')) returns contents of step_length_box as a double
+
+len = str2double(get(handles.step_length_box,'string'));
+set(handles.step_length_slide,'value',len);
+
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function step_length_box_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to step_length_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function data_processing_panel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to data_processing_panel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+%set the recursion limit higher than the default 500 - some graphing calls
+%appear ti use significantly higher than that, and hopefully any computer
+%this is running on is sufficiently fast....
+
+set(0,'RecursionLimit',3000);
+
+
+% --- Executes on button press in gaussians_button.
+function gaussians_button_Callback(hObject, eventdata, handles)
+% hObject    handle to gaussians_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%this button will go through the video file and drag out only particle
+%locations, but without linking the trajectories. Then these data are
+%written back into a new video file, which has the same name as the
+%original, but this time with the addition of '_gauss' on the end. Where
+%particles were detected, a normalised gaussian will be written.
+
+%work out whether it's an avi or and ids file I'm trying to read...
+readfile = get(handles.pathbox,'string');
+if strcmp(readfile(end),'i')
+    filetype = 'avi';
+elseif strcmp(readfile(end),'s')
+    filetype = 'ids';
+else
+    errordlg('Something went wring when determining the type of file to read.');
+    return
+end
+
+
+%open the video file
+if strcmp(filetype,'avi')
+    obj = VideoReader(get(handles.pathbox,'string'));
+end
+    
+%get video detection and denoise parameters
+w = get(handles.glob_slide,'value');
+cutoff = get(handles.cutoff_slide,'value');
+pth = get(handles.thresh_slide,'value');
+
+switches = zeros(3,1);
+params = zeros(3,1);
+
+switches(2) = get(handles.disc,'value');
+switches(1) = get(handles.denoise_box,'value');
+switches(3) = get(handles.blur_box,'value');
+
+params(2) = get(handles.background_disk,'value');
+params(1) = get(handles.background,'value');
+params(3) = get(handles.blur,'value');
+
+%get filename from pathbox
+path = get(handles.gauss_path,'string');
+if strcmp(path,'Enter save path here')
+    errordlg('Please choose somewhere to save the file!','File save error!');
+    return
+end
+
+%make a new blank video file
+filename = path;
+vid = VideoWriter(filename);
+vid.FrameRate = obj.FrameRate;
+vid.Quality = 100;
+open(vid);
+
+%set radius of gaussians to generate
+radius = 20;
+
+if strcmp(filetype,'avi')
+    %iterate over frames of original video
+    progressbar('Converting Video...');
+    for i = 1 : obj.NumberOfFrames
+        img = read(obj,i);    %read frame
+        try
+            img = rgb2gray(img);
+        catch
+            img = img;
+        end
+        img = imageprocess(img,switches,params); %denoise it
+        output = detect_particles(img,round(w),cutoff,pth,[0 0],50); %find particles
+        output = output{1};
+        gaussimg = zeros(length(img(:,1))+(2*radius),length(img(1,:))+(2*radius));
+        for j = 1 : length(output(:,1)) %loop over detected particles
+            gaussimg = add_gaussian(gaussimg,radius,output(j,1),output(j,2),0,5);        
+        end
+        gaussimg = shrink_matrix(gaussimg,radius);
+        %csvwrite('gauss_test.csv',gaussimg);
+        const = max(gaussimg(:));
+        writeVideo(vid,gaussimg*(1/const));
+        progressbar(i/obj.NumberOfFrames);
+    end
+elseif strcmp(filetype,'ids')
+    progressbar('Converting Video...');
+    %figure out number of frames
+    currentdir = pwd;
+    newdir = readfile;
+    while ~strcmp(newdir(end),'/')
+        newdir = newdir(1:end-1);
+    end
+    cd(newdir);
+    searchfile = dir('image*');
+    cd(currentdir);
+    framecount = length(searchfile);
+    for i = 1 : framecount
+        img = imread(strcat(newdir,'image',num2str(i),'.tif'));
+        try
+            img = rgb2gray(img);
+        catch
+            img = img;
+        end
+        img = imageprocess(img,switches,params); %denoise it
+        output = detect_particles(img,round(w),cutoff,pth,[0 0],50); %find particles
+        output = output{1};
+        gaussimg = zeros(length(img(:,1))+(2*radius),length(img(1,:))+(2*radius));
+        for j = 1 : length(output(:,1)) %loop over detected particles
+            gaussimg = add_gaussian(gaussimg,radius,output(j,1),output(j,2),0,5);        
+        end
+        gaussimg = shrink_matrix(gaussimg,radius);
+        %csvwrite('gauss_test.csv',gaussimg);
+        const = max(gaussimg(:));
+        writeVideo(vid,gaussimg*(1/const));
+        progressbar(i/framecount);
+    end
+else
+    errordlg('Something has gone badly wrong - it should be impossible to trigger this dialogue box...');
+    return
+end
+        
+
+
+% --- Executes on button press in gauss_select.
+function gauss_select_Callback(hObject, eventdata, handles)
+% hObject    handle to gauss_select (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename,filepathname,filter] = uiputfile('.avi');
+path = strcat(filepathname,filename);
+set(handles.gauss_path,'string',path);
+
+
+
+
+function gauss_path_Callback(hObject, eventdata, handles)
+% hObject    handle to gauss_path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gauss_path as text
+%        str2double(get(hObject,'String')) returns contents of gauss_path as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gauss_path_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gauss_path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in shape.
+function shape_Callback(hObject, eventdata, handles)
+% hObject    handle to shape (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of shape
+
+
+
+function refractive_Callback(hObject, eventdata, handles)
+% hObject    handle to refractive (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of refractive as text
+%        str2double(get(hObject,'String')) returns contents of refractive as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function refractive_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to refractive (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in gauss_select.
+function set_gauss_path_Callback(hObject, eventdata, handles)
+% hObject    handle to gauss_select (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in popout.
+function popout_Callback(hObject, eventdata, handles)
+% hObject    handle to popout (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%stops live playback in local axes.
+set(handles.livetime,'string','0');
+pause(1);
+pause(1);%allows refresh of old window to stop
+
+%save current data so zoomed view can access it
+a = zoom_params(hObject,handles);
+
+%calls zoomed axis set
+zoom_axes();
+
+
+guidata(hObject,handles);
+
+
+% --- Executes on button press in ssd.
+function ssd_Callback(hObject, eventdata, handles)
+% hObject    handle to ssd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of ssd
+
+
+% --- Executes on button press in drift.
+function drift_Callback(hObject, eventdata, handles)
+% hObject    handle to drift (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of drift
+
+%enable and disable the x- and y-corrections as necessary.
+if get(handles.drift,'value')
+    set(handles.xcorrect,'enable','on');
+    set(handles.ycorrect,'enable','on');
+else
+    set(handles.xcorrect,'enable','off');
+    set(handles.ycorrect,'enable','off');
+    set(handles.xcorrect,'value',0);
+    set(handles.ycorrect,'value',0);
+end
+
+
+% --- Executes on button press in xcorrect.
+function xcorrect_Callback(hObject, eventdata, handles)
+% hObject    handle to xcorrect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of xcorrect
+
+%make sure that if neither correction has been selected, that no correction
+%will be applied to save computational time
+if ~get(handles.xcorrect,'value')
+    if ~get(handles.ycorrect,'value')
+        set(handles.drift,'value',0);
+        set(handles.xcorrect,'enable','off');
+        set(handles.ycorrect,'enable','off');
+    end
+end
+
+
+% --- Executes on button press in ycorrect.
+function ycorrect_Callback(hObject, eventdata, handles)
+% hObject    handle to ycorrect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of ycorrect
+
+%as in the previous callback for the other directional correction.
+if ~get(handles.xcorrect,'value')
+    if ~get(handles.ycorrect,'value')
+        set(handles.drift,'value',0);
+        set(handles.xcorrect,'enable','off');
+        set(handles.ycorrect,'enable','off');
+    end
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function xcorrect_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xcorrect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in popout_anal.
+function popout_anal_Callback(hObject, eventdata, handles)
+% hObject    handle to popout_anal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%write all the analysis parameters to disk
+
+%disc filter
+fid = fopen('discsw.file','w');
+fprintf(fid,'%u',get(handles.disc,'value'));
+fclose(fid);
+
+if get(handles.disc,'value')
+    %write disc values too
+    fid = fopen('discval.file','w');
+    fprintf(fid,'%u',get(handles.background_disk,'value'));
+    fclose(fid);
+end
+
+%compress
+fid = fopen('compressse.file','w');
+fprintf(fid,'%u',get(handles.denoise_box,'value'));
+fclose(fid);
+
+if get(handles.denoise_box,'value')
+    fid = fopen('compressval.file','w');
+    fprintf(fid,'%u',get(handles.background,'value'));
+    fclose(fid);
+end
+
+%blur
+fid = fopen('blurse','w');
+fprintf(fid,'%u',get(handles.blur_box,'value'));
+fclose(fid);
+
+if get(handles.blur_box,'value')
+    fid = fopen('blurval.file','w');
+    fprintf(fid,'%u',get(handles.blur,'value'));
+    fclose(fid);
+end
+
+
+%glob
+fid = fopen('globval.file','w');
+fprintf(fid,'%u',get(handles.glob_slide,'value'));
+fclose(fid);
+
+%cutoff
+fid = fopen('cutoffval.file','w');
+fprintf(fid,'%u',get(handles.cutoff_slide,'value'));
+fclose(fid);
+
+%pth
+fid = fopen('pthval.file','w');
+fprintf(fid,'%u',get(handles.thresh_slide,'value'));
+fclose(fid);
+
+%file to view
+fid = fopen('file.file','w');
+fprintf(fid,'%s',get(handles.pathbox,'string'));
+fclose(fid);
+
+%current scrubber position
+fid = fopen('scrubber.file','w');
+fprintf(fid,'%u',get(handles.position,'value'));
+fclose(fid);
+
+%scrubber max
+fid = fopen('scrubbermax.file','w');
+fprintf(fid,'%u',get(handles.position,'max'));
+fclose(fid);
+
+
+
+%this needs to call the zoomed view...
+zoom_detect;
+
+
+guidata(hObject,handles);
+
+
+% --- Executes on button press in restore.
+function restore_Callback(hObject, eventdata, handles)
+% hObject    handle to restore (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+%set disc info
+fid = fopen('discsw.file','r');
+if fread(fid)
+    set(handles.disc,'value',1);
+    fid2 = fopen('discval.file','r');
+    set(handles.background_disk,'value',fread(fid2));
+    fclose(fid2);
+else
+    set(handles.disc,'value',0);
+end
+fclose(fid);
+
+%set compress info
+fid = fopen('compressse.file','r');
+if fread(fid)
+    set(handles.denoise_box,'value',1);
+    fid2 = fopen('compressval.file','r');
+    set(handles.background,'value',fread(fid2));
+    flcose(fid2);
+else
+    set(handles.denoise_box,'value',0);
+end
+fclose(fid);
+
+%blur
+fid = fopen('blurse.file','r');
+if fread(fid)
+    set(handles.blur_box,'value',1);
+    fid2 = fopen('blurval.file','r');
+    set(handles.blur,'value',fread(fid2));
+    fclose(fid2);
+else
+    set(handles.blur_box,'value',0);
+end
+fclose(fid);
+
+%glob
+fid = fopen('globval.file','r');
+set(handles.glob_slide,'value',fread(fid));
+fclose(fid);
+
+%cutoff
+fid = fopen('cutoffval.file','r');
+set(handles.cutoff_slide,'value',fread(fid));
+fclose(fid);
+
+%pth
+fid = fopen('pthval.file','r');
+set(handles.thresh_slide,'value',fread(fid));
+fclose(fid);
+
+%file
+fid = fopen('file.file','r');
+set(handles.pathbox,'string',fread(fid));
+fclose(fid);
+
+%scrub max
+fid = fopen('scrubbermax.file','r');
+set(handles.position,'max',fread(fid));
+fclose(fid);
+
+%scrub
+fid = fopen('scrubber.file','r');
+set(handles.position,'value',fread(fid));
+fclose(fid);
+
+guidata(hObject,handles);
+
+
+% --- Executes on slider movement.
+function screen_gain_slide_Callback(hObject, eventdata, handles)
+% hObject    handle to screen_gain_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+set(handles.screen_gain_num,'string',num2str(get(handles.screen_gain_slide,'value')));
+
+img = image_cleanup(hObject,handles);
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function screen_gain_slide_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to screen_gain_slide (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in screen_gain_box.
+function screen_gain_box_Callback(hObject, eventdata, handles)
+% hObject    handle to screen_gain_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of screen_gain_box
+img = image_cleanup(hObject,handles);
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+function screen_gain_num_Callback(hObject, eventdata, handles)
+% hObject    handle to screen_gain_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of screen_gain_num as text
+%        str2double(get(hObject,'String')) returns contents of screen_gain_num as a double
+set(handles.screen_gain_slide,'value',str2double(get(handles.screen_gain_num,'string')));
+
+img = image_cleanup(hObject,handles);
+%display it
+axes(handles.camera_preview);
+imshow(img);
+
+hold on
+
+preview_spots = check_detection(hObject,handles);
+scatter(preview_spots(:,1),preview_spots(:,2));
+
+hold off
+
+%update the handles structure
+guidata(hObject,handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function screen_gain_num_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to screen_gain_num (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in expconf.
+function expconf_Callback(hObject, eventdata, handles)
+% hObject    handle to expconf (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+disc_on = num2str(get(handles.disc,'value'));
+disc_val = num2str(get(handles.background_disk,'value'));
+compress_on = num2str(get(handles.denoise_box,'value'));
+compress_val = num2str(get(handles.background,'value'));
+blur_on = num2str(get(handles.blur_box,'value'));
+blur_val = num2str(get(handles.blur,'value'));
+gain_on = num2str(get(handles.screen_gain_box,'value'));
+gain_val = num2str(get(handles.screen_gain_slide,'value'));
+gsp_val = num2str(get(handles.glob_slide,'value'));
+cutoff_val = num2str(get(handles.cutoff_slide,'value'));
+threshold_val = num2str(get(handles.thresh_slide,'value'));
+minsteps_val = get(handles.minsteps_box,'string');
+maxerr_val = get(handles.maxerr_box,'string');
+%set contiguous analysis!
+pix_val = get(handles.custom_pixel_box,'string');
+%set temperature!
+minsize_val = get(handles.min_particle_size,'string');
+maxjump_val = num2str(get(handles.step_length_slide,'value'));
+%use drift correction always!
+
+fid = fopen('analysis_settings.conf','w');
+fprintf(fid,strcat(disc_on,'\n'));
+fprintf(fid,strcat(disc_val,'\n'));
+fprintf(fid,strcat(compress_on,'\n'));
+fprintf(fid,strcat(compress_val,'\n'));
+fprintf(fid,strcat(blur_on,'\n'));
+fprintf(fid,strcat(blur_val,'\n'));
+fprintf(fid,strcat(gain_on,'\n'));
+fprintf(fid,strcat(gain_val,'\n'));
+fprintf(fid,strcat(gsp_val,'\n'));
+fprintf(fid,strcat(cutoff_val,'\n'));
+fprintf(fid,strcat(threshold_val,'\n'));
+fprintf(fid,strcat(minsteps_val,'\n'));
+fprintf(fid,strcat(maxerr_val,'\n'));
+fprintf(fid,strcat(pix_val,'\n'));
+fprintf(fid,strcat(minsize_val,'\n'));
+fprintf(fid,strcat(maxjump_val,'\n'));
+fclose(fid);
+
+
+% --- Executes on button press in export_graph.
+function export_graph_Callback(hObject, eventdata, handles)
+% hObject    handle to export_graph (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+datafile = get(handles.output_path,'string');
+data = csvread(datafile);
+
+%make sure that any lines of spreadsheet with NaN or inf are removed.
+data = remove_invalid(data);
+
+
+% %trim the data as required
+top_trim = get(handles.top_trim_checkbox,'value');
+if top_trim
+    max_allowed = str2double(get(handles.top_trim_box,'string'))/(10^9);
+    if max_allowed == 0
+        errordlg('please specify an upper particle size limit!','Trimming error!');
+    end
+   len = length(data(:,1));
+    for i = 1 : len
+        if data(len-i+1,1) > max_allowed
+            data(len-i+1,:) = [];
+        end
+    end
+%     i = 1;
+%     while i <= length(data(:,1))
+%         if data(i,1) > max_allowed
+%             data(i,:) = [];
+%             i = i-1;
+%         end
+%         i = i+1;
+%     end
+end
+
+bottom_trim = get(handles.bottom_trim_checkbox,'value');
+if bottom_trim
+    min_allowed = str2double(get(handles.bottom_trim_box,'string'))/(10^9);
+    if min_allowed == 0
+        errordlg('please specify a lower particle size limit!','Trimming error!');
+    end
+    len = length(data(:,1));
+    for i = 1 : len
+        if data(len-i+1,1) < min_allowed
+            data(len-i+1,:) = [];
+        end
+    end
+end
+
+%control for minimum track length
+minsteps = str2double(get(handles.minsteps2,'string'));
+len = length(data(:,1));
+for i = 1 : len
+    if data(len-i+1,3) < minsteps
+        data(len-i+1,:) = [];
+    end
+end
+
+plot_data = gaussian_plot(data);  
+
+
+
+%check plot data is sensible
+if length(plot_data(:,1)) < 3
+    errordlg('For some reason, your plotting settings are incompatible with your current data. Please choose different settings and replot.','Histogram Error!');
+    set(handles.plot_replot,'enable','on');
+    guidata(hObject,handles);
+    return
+end
+
+if get(handles.top_trim_checkbox,'value')
+    plot_max = str2double(get(handles.top_trim_box,'string'));
+    if plot_max < length(plot_data(:,1))
+        for i = plot_max : length(plot_data(:,1))-1
+            plot_data(plot_max+1,:) = [];
+        end
+    end
+end
+if get(handles.bottom_trim_checkbox,'value')
+    plot_min = str2double(get(handles.bottom_trim_box,'string'));
+    for i = 1 : plot_min
+        plot_data(1,:) = [];
+    end
+end
+
+
+exportfile = strcat(datafile(1:end-3),'export.csv');
+csvwrite(exportfile,plot_data);
+
+%don't need to plot, need to export!
+%plot(handles.output_histogram,plot_data(:,1),plot_data(:,2));
+
+
+%decide whether to look for peaks
+if str2double(get(handles.peak_count,'string')) ~= 0
+    %check that there's sufficient data to find this many peaks
+    if str2double(get(handles.cust_hist_bin_val,'string')) ~= 0
+        if str2double(get(handles.peak_count,'string')) >= str2double(get(handles.cust_hist_bin_val,'string'))
+            if get(handles.cust_hist_bin,'value')
+                errordlg('You are looking for too many peaks!','Peak finding error!')
+                set(handles.plot_replot,'enable','on');
+                guidata(hObject,handles);
+                return
+            end
+        end
+    end
+    if str2double(get(handles.peak_count,'string')) >= length(data(:,1))/10
+        errordlg('You are looking for too many peaks!','Peak finding error!')
+        set(handles.plot_replot,'enable','on');
+        guidata(hObject,handles);
+        return
+    end
+    peaks = zeros(str2double(get(handles.peak_count,'string')),2); %2 columns, location and height
+    peaks = pkfind(plot_data,peaks,str2double(get(handles.peak_count,'string')));
+    %add first particle
+    set(handles.peaks_detected,'string',strcat(num2str(round(peaks(1,1)*10^9)),' nm, ',num2str(peaks(1,2)),' particles'));
+    %and the rest if necessary
+    string = {strcat(num2str(round(peaks(1,1)*(10^9))),' nm, ',num2str(peaks(1,2)),' particles')};
+    if str2double(get(handles.peak_count,'string')) > 1
+        for peak = 2 : str2double(get(handles.peak_count,'string'))
+            %write the output
+            string{end+1} = strcat(num2str(round(peaks(peak,1)*(10^9))),' nm, ',num2str(peaks(peak,2)),' particles');
+            set(handles.peaks_detected,'string',string);
+        end
+    end
+else
+   set(handles.peaks_detected,'string','Choose a number of peaks to find!');
+end
+
+%update handles structure
+guidata(hObject,handles);
+
+
+% --- Executes on key press with focus on process_button and none of its controls.
+function process_button_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to process_button (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over process_button.
+function process_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to process_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function text39_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text39 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function text40_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text40 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called

@@ -497,6 +497,15 @@ pxptch = str2double(get(handles.custom_pixel_box,'string'));
 
 frames = max_frames;
 
+% start of the debug line to check the file extension 19/11/2026
+if ~isfield(handles, 'mediatype')
+    handles.mediatype = [];
+    guidata(hObject, handles);
+end
+%mediatype = handles.mediatype;
+mediatype = 'avi'; % temp fix 19/11/2026
+fprintf('mediatype = %s\n', mediatype)
+% end of the debug line to check the file extension 19/11/2026
 %set video framerate
 if strcmp(mediatype,'avi')
     path = get(handles.pathbox,'string');
@@ -1252,7 +1261,10 @@ end
 
 %work out whether it's an .avi video or an .ids datafile
 datafile = get(handles.pathbox,'string');
-if strcmp(datafile(end),'i')
+if strcmp(datafile(end),'i') %this is a fragile way to detect avi extension
+    % define mediatype explicitly for use in processing 19/11/2026
+    set(handles.pathbox,'string',strcat(filepathname,filename));
+    % end of 19/11/2026 correction
     %read video file
     obj = VideoReader(get(handles.pathbox,'string'));
     vid = read(obj,1);
@@ -2911,8 +2923,19 @@ function preview_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-open_camera();
+%open_camera();   %modified 19/11/2026, replaced by the following codes
+try
+    open_camera();
+catch
+    mainFig = ancestor(hObject, 'figure');
+    figure(mainFig);
+    d = warndlg('The camera function is not available', 'Camera unavilable', 'modal');
+    movegui(d, "center");
+    uiwait(d);
 
+    figure(mainFig)
+end 
+% end of 19/11/2026 modification
 guidata(hObject,handles);
 
 
@@ -3131,7 +3154,7 @@ function gaussians_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %this button will go through the video file and drag out only particle
-%locations, but without linkin gthe trajectories. Then these data are
+%locations, but without linking the trajectories. Then these data are
 %written back into a new video file, which has the same name as the
 %original, but this time with the addition of '_gauss' on the end. Where
 %particles were detected, a normalised gaussian will be written.
