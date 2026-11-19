@@ -1,0 +1,1 @@
+wget http://static.schlockmercenary.com/comics/schlock20001004.png

@@ -1,0 +1,2 @@
+successfully retrieved valid exposures 
+successfully set new exposure 

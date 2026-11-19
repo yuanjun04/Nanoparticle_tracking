@@ -1,0 +1,546 @@
+*********************************************************
+Manual for mex with OpenCV and uEye cameras, under Linux
+*********************************************************
+
+It is possible with a lot of tinkering to persuade matlab to work with a uEye camera under linux, with the aid of some C++ coding, the API provided by the uEye drivers, some mex files, and the OpenCV C library for computer vision. This manual is divided up into sections. It assumes a rudimentary knowledge of linux, C++, and matlab.
+
+This manual starts by going through the proceedure to obtain still images, and then extends the technique to capturing strings of images, and then videos. It it *not* a comprehensive manual of the uEye API, not does it aspire to be. Rather, it aims to help the reader overcome the steep learning curve of the new uEye API user and get them to the stage at which the complete reference manual makes enough sense to learn 
+
+This should work with all USB (2&3) uEye cameras, and probably GigE-based, though I can't test this (I think the GigE cameras may have a slightly different initialisation routine). 'uEye cameras' includes all such branded cameras sold by IDS, and all rebranded cameras, such as those sold in the DCU range by Thorlabs.
+
+*******************
+1. Mex files
+2. uEye API
+3. OpenCV
+4. Video Capture
+5. Advanced features
+6. Final notes
+
+
+*******************
+1. Mex files
+*******************
+
+Mex files are a means of integrating code in C, C++, or Fortran into a matlab project. Under linux, matlab detects the g++ compiler (part of the GCC compiler collection) automatically, and should be able to use it automatically. If you use windows, seriously consider switching operating systems, or you're letting yourself in for a world of pain. I think there are free Microsoft C++ Redistributable packages, but I have never used them. There are no uEye drivers for OSX, though you could probably port them from the linux versions if you were that way inclined (I'm not). Under OSX mex still works, and will automatically detect either g++ or CLang compilers. You can manually select between different available compilers by running 'mex -setup' from the matlab command prompt. CLang usually can optimise code slightly better, but since we won't be optimising at all, it is of remarkably little consequence which we use. It is worthy of note that g++ has a larger use community, so troubleshooting will tend to be easier.
+
+A mex file in C++ (which is what this manual deals with) has several important things that need to be included with it. These are:
+-The correct mex header file
+-The correct gateway function
+-Pointers to the matlab variables
+-A self-termination
+
+*
+
+Mex header file
+
+The mex header file should be included in all mex functions. This may be done in the normal way, by adding '#include <mex.h>' to the preamble. If your matlab installation has been done properly, and the compiler is correctly configured, then g++ should be able to find the correct file automatically. If the header file isn't automatically found, then if you ask nicely I might be able to write you a script that fixes it for you.
+
+The mex header file does several things:
+-It defines several C++ types that don't appear in normal C++. These include things like mxArrays, which allow C++ to correctly read matlab arrays right from the memory address matlab stores them at using pointers, rather than copying the variables across, thus saving on both the memory burden and the computational time.
+-It introduces functions that can convert between matlab types and C++ types (for example, if you pass an array from matlab to C++, you use some C++ libraries that require an input array to be a C++ array, you need to have a means of converting the array to be readable to the external library. It also allows for conversion the other way.
+
+*
+
+Gateway function
+
+Normal C++ programs require a 'main' function, which returns an integer '1' upon successful completion. Matlab has no capacity for a mex function to return any data in the ordinary way, and because a 'main' function always has to return an integer, your mex code cannot contain a 'main' function. Instead, it needs a 'gateway function', which must always be called 'mexFunction', and must always return nothing, ie 'void mexFunction ()'. This mexFunction needs to have precisely 4 arguments, which takes us on to the next section...
+
+*
+
+Pointers to matlab variables
+
+Of the 4 arguments that mexFunction takes, two are pointers to matlab variables, and the other two enumrate them - the 4 arguments are paired as follows:
+
+-'nrhs', which is the number of variables on the right hand side of the matlab equation. For example, if the line of code calling a mex function called 'myFunc' was 'out1,out2 = myFunc(inArray, var1, var2);', then nrhs would be the integer '3'.
+-'nlhs' is the corresponding number of variables on the left hand side of the calling function, so in the case of the above example, this would be the integer '2'.
+-'prhs[]' is a pointer to the right hand side of the matlab function. For example, prhs[0] would contain the input variable 'inArray' from the example, prhs[1] would point to 'var1' and so on.
+-'plhs[]' is exactly the same, only it points to the left hand side, so plhs[0] would return a pointer to 'out1'.
+
+Therefore, the line declaring the gateway function must *always* be as follows:
+
+void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
+
+It is important to note that these two pointers don't behave like an ordinary C++ pointer - it isn't possible to de-reference them normally. Let's look at it with the aid of an example: say we were calling a function a = myFunc(b); from matlab. Then prhs[0] would be a matlab pointer to 'b' in matlab. If b was of type 'double' in order to access the value associated with b from C++, we would use a function from mex.h, mxGetScalar, as follows:
+
+double b = mxGetScalar(prhs[0]);
+
+b could then be used in exactly the same manner that one would use the double 'b' in matlab.
+
+Similarly, assigning return functions isn't as simple as it could be. While it should be possible to assign a variable to provide the value of plhs[n] perfectly trivially, it actually requires that a new pointer be declared. For example, using again the simples case of double type variables and a = myFunc(b);, 
+
+double *a = mxGetPr(plhs[0]);
+
+then 'a' may be used as a normal C++ variable, and when the mexFunction terminates, the value of 'a' will be transferred back into matlab as the output.
+
+for more complex systems, the same may be repeated with plhs[1], plhs[2]....plhs[n], and the same with prhs[1] etc....
+
+It is also possible to assign arrays to these output pointers by using the function mxCreateDoubleMatrix(), documentation available from mathworks.
+
+*
+
+Self-termination
+
+Because mexFunction doesn't return anything upon successful execution, your mexFunction must be self-terminating - it doesn't just come to the end of the block of code associated with mexFunction and terminate gracefully - it can behave erratically. It is best to make sure that there's always a 'return;' at the end of the block. It will fail to compile if there's anything between the 'return' and the semicolon - a function that returns 'void' cannot return a value!
+
+mex functions can be compiled from within matlab using the command 
+
+mex myFunc.cpp
+
+myFunc.cpp must be in the active matlab directory. Thereafter, it can be called in the argsin = myFunc(argsout); syntax of any other matlab function.
+
+*
+
+Mex with other libraries
+
+While you can write as much mex code as you want at this point, later on you'll find that while your code compiles, it will likely ask for a shared object file that it looks like it already has. This is because a given version of matlab is designed to run with a specific version of GCC, and if a more recent version of GCC is used during compilation, the library that matlab installs for itself is incompatible with the compiler.
+
+This is easily remedied: 
+
+open a terminal window and login as root (run 'sudo -i').
+
+then run 'find / | grep NAME_OF_LIBRARY_MATLAB_WANTS'
+
+you'll find that there's a library (.so) file with that name should be installed in /usr/lib/ (unless you've been playing with your GCC installation), and also in your matlab install folder. cd to the matlab version, and change its name to add a '.old' extension on the end of it. Then create a symlink to the other version of it (run 'ln -s PATH_TO_GCC_LIBRARY NAME_OF_SYMLINK') The name of the symlink should obviously be the same as the file it replaces. Repeat this for as many shared objects as matlab wants.
+
+Next time you compile and run the code, matlab should follow the symlink and your code should execute successfully with the correct library.
+
+
+**********************
+2. uEye API
+**********************
+
+The uEye API can be simply added to a mex file. There are two components that the uEye API requires in order to work. The first of these is just another header file, that on a normal installation of uEYE can be included by using:
+
+#include <ueye.h>
+
+The header file contains mappings and definitions for user-readable parameters (IS_WAIT is far more user-friendly than 0x1F33FA1B), and declares some new and useful types and structs. You should never need to worry about the header file though.
+
+However, it also needs to be compiled against a shared object. Shared objects in linux are pre-compiled binaries, which have the file extension .so and always start with the filestub 'lib'. Once again, a standard uEye installation should allow g++ to find the shared object automatically. If you're not using linux, this isn't the case, but you still need to compile against the same object. I have no idea how this works, but you could try passing the same arguments to the compiler and see what happens...
+
+In order to pass this library to the compiler to compile against, we need to compile against libueye_api.so. This may be accomplished using the compilation command:
+
+mex myFunc.cpp -lueye_api
+
+The uEye API contains a wide range of functions. This rudimentary manual will contain only the required information to allow the user to capture still frames rather than active video - it should help the user gain an understanding of some of the more counter-intuitive nicities of the API.
+
+The code given here will NOT work alone - there are missing gaps that require another API to fill - that's why OpenCV is included in this tutorial. This section is purely looking at communicationg with a uEye camera.
+
+Firstly, we need to tell the uEye drivers which camera to connect to. This is more complex (translation: I havn't a clue) with multiple camera environments. If there is only one camera, that camera (unless you tell it to behave otherwise) will always be assigned the handle '1'. Before we can communicate with the camera, we need to explicitly tell the API which camera to talk to, and we do this with the line:
+
+HIDS hCam = 1;
+
+This uses the type 'HIDS', which is included in ueye.h. The name 'hCam' is purely arbitrary, but is used in the uEye manual, so I'll use it here for consistency. Once you've declared your camera handle, you then need to initialise the camera, using:
+
+int initcamera = is_Init_Camera(&hCam, NULL);
+
+This is a good example to use to introduce the syntax of a great many uEye functions. is_Init_Camera() can be called without an output argument (in the example, initcamera), but things start going badly if that command fails. All (or nearly all) uEye functions will return an integer. This integer will contain a value that reflects the outcome: 0 means it executed successfully, and other numbers up to 206 reflect different failures. A full table of these may be found in the manual, or by trawling through ueye.h. One way of using these diagnostic numbers could involve:
+
+if (initcamera != IS_SUCCESS){
+	//some function if the initialisation fails
+}
+
+The library allows you to query the error associated with the number, so '!=IS_SUCCESS' could be replaced by '!=0', though using the mapped names makes the code far more readable in retrospect. You also need to declare a few other things:
+
+SENSORINFO = sensor_info;
+CAMINFO = camera_info;
+
+Again, this uses non-standard types that are included in the header files (really, they're just structs filled with enums, but you don't have to worry about that).
+
+These variables may be populated using the following couple of lines of code, passing them as references.
+
+int camerainfo = is_GetCameraInfo (hCam, &camera_info);
+int sensorinfo = is_GetSensorInfo (hCam, &sensor_info);
+
+These commands will have populated sensor_info and camera_info. This step allows us to then pull out the maximum sensor size:
+
+int pXPos = (sensor_info.nMaxWidth);
+int pXPos = (sensor_info.nMaxHeight);
+
+We'll need to pass these later on to the actual capture stage.
+
+We also need to set the colour mode, which will depend upon the camera you're using. In my case, my camera can support up to RGB24, so that's what I'm going to set:
+
+int colormode = is_Set_ColorMode(hCam, IS_SET_CM_RGB24);
+
+Similarly, 'IS_SET_CM_RGB24' corresponds to a number you could look up and use instead, but this is a far more common-sense means of doing it.
+
+Now we're ready to claim some memory off the heap and load it onto the stack for us to capture data into. This has several steps: declaring NULL pointers, allocating the memory to the camera, and then telling the camera it can record data to those pointers:
+
+char* m_pcImageMemory;
+int m_lMemoryId;
+int rit = is_AllocImageMem(hCam,pXPos,pYPos, 24, &m_pcImageMemory, &m_lMemoryId);
+int rat = is_SetImageMem (hCam, m_pcImageMemory, m_lMemoryId);
+
+Those lines should be self-explanatory - it's more or less standard C++ syntax. When allocating memory, you need to allocate sufficient for the X and Y size of the image, the bit-depth (in this case, 24), and it needs references to allocate to the stack.
+
+Before actually capturing any data, there are several other things it's recommended you set. I've put some code below you may copy, changing the common sense declared values. However, be careful - you MUST declare them in this way - the functions don't like being given floats or integers as arguments, they just want pointers or references, even if the variables aren't changed by the function.
+
+//set colour correction factor
+double strength_factor = 1.0;
+int colorcorrection = is_SetColorCorrection(hCam, IS_CCOR_ENABLE, &strength_factor);
+
+//set white-balance correction
+double pval = 1;
+int whiteb = is_SetAutoParameter(hCam, IS_SET_ENABLE_AUTO_WHITEBALANCE, &pval, 0);
+
+//set gain parameter
+double gval = 1;
+int gains = is_SetAutoParameter(hCam, IS_SET_ENABLE_AUTO_GAIN, &gval, 0);
+
+There are a few final things that need setting before we can capture anything. I'll be honest and admit I haven't an earthly what they do or why they're necessary, but I do know that it doesn't work without them:
+
+int dummy;
+char *pMem, *pLast;
+
+Finally, we can capture some image data!
+
+int sho = is_FreezeVideo(hCam, IS_WAIT);
+
+This leaves some raw image data stored in 'm_pcImageMemory'. If one simply tries to write this to a file, you'll end up with a meaningless string of hex, with odd unicode characters in it. Good luck trying to find anything that can open it (I only found one program out of a multitude that could even tell me that much about it). Clearly we need another piece of software that can deal with just such a raw image stream, but that's for the next section...
+
+To conclude, we need to release the camera so another piece of software (or another call of the same function) can call it. If this was a manual for a stand-alone C++ code that exited once it had executed, this wouldn't be necessary, but because we're looking at using mex, when a mex file opens the camera, camera ownership actually gets passed higher up the process tree and it gets given to matlab. If you forget to close the camera, then you'll need to restart matlab in order to open it again! This includes if the program fails halfway through. This is a good use case for many conditional statements to catch the case of if(/*a variable*/ != IS_SUCCESS){}, allowing you to then close the camera and manually return, allowing the camera to be called multiple times successively from a single matlab instance.
+
+int en = is_ExitCamera(hCam);
+
+And now you should be able to capture image data using the uEye API!
+
+**Important addendum - using this technique for stand-alone programming, all is fine and dandy - once the program has captured an image, saved it, and exited, the memory used will be freed. However, this is not the case if calling it as a mex file from matlab - in this case, memory is only freed upon matlab exiting, unless you free it manually. While you may not miss the odd few megabytes for a frame or two, if you set up something like a slow live-update allowing imaging settings to be changed between every frame (I have) then after a remarkably short period you can find yourself crunching your way through tens of gigabytes of RAM. Adding the following line to the bottom of your code (and before any premature 'return' statements) will force your code to release the memory used for video capture before exiting and orphaning it (once your code has exited and left memory allocated to the stack, it's impossible to make matlab release it to the heap again without closing it and re-opening; allowing a different program to access and release the same memory as the original one would be a massive security oversight).
+
+int fMem = is_FreeImageMem (hCam, m_pcImageMemory, m_lMemoryId);
+
+
+
+********************
+OpenCV
+********************
+
+
+In the previous section I said that some kind of go-between program is required to read in the raw image data, and that's where OpenCV comes in. It's a free computer vision toolbox developed mainly be Intel, and it can do quite a few things we need. You'll need to download a tarball and compile it from source, and it has quite a few dependencies that need satisfying as well. Once again, if you're still not on linux, you're completely on your own.
+
+The uEye API does come with the rudimentary ability to create its own image files, but the selection is limited to .jpg, .bmp, and .png. Jpegs and PNGs are compressed and lossy, and often not much use for scientific applications, and it doesn't support windows bitmaps very well under linux, and they're not such a useful file format. Feel free to skip all references to OpenCV, but I'm hoping you'll thank me for making it easy for you!
+
+*
+
+Installing OpenCV
+
+Dependencies:
+
+GCC 4.4.x+ (which you should have anyway, unless you've gutted your system)
+CMake 2.8.7+
+Git
+GTK+2.x+
+Python 2.6+ with NumPy 1.5+
+ffmpeg
+
+If your system uses apt-get to install packages:
+
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+
+or if you use aptitude:
+
+sudo aptitude install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+
+or if you use something else (portage, yum etc) you can probably fend for yourself...
+
+I also recommend you install:
+
+python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+
+which you can just copy into your package manager of choice.
+
+Now you need the source code, available from sourceforge.net/projects/opencvlibrary . Make sure you get the stable one, the newer ones add no additional useful functionality unless you need advanced object recognition and 3D rendering (we don't).
+
+Fire up a terminal, and cd to the directory you expanded the tarball to (or if you don't know how to extract a tarball, go to your downloads folder, and run 'tar -xvf FILENAME.tar' and then cd into the new folder), and run:
+
+mkdir release && cd release && cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+
+This should take a minute or so to execute. Then type 'make -j8', where the 8 would run 8 parallel threads. The fastest compile times are achieved if you choose a number of threads that corresponds to the number of physical cores on your machine. This may take upwards of half an hour even on a relatively fast machine, and will probably use several gigabytes of RAM. Once this has completed, follow it up with 'sudo make install'. This will install OpenCV on your machine. If at any point you decide to uninstall OpenCV, navigate back to this directory and run 'sudo make uninstall', and it'll do a complete removal of it (because you compiled it yourself, your package manager probably doesn't know about it, so using a package manager to remove it won't work).
+
+*
+
+Including OpenCV in a C++ file
+
+It's remarkably non-trivial to include the library in your code. Firstly, you need to include quite a lot more stuff for it to work. You need to add the following to your preamble:
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "opencv2/core/core.hpp"
+#include "cv.h"
+#include <highgui.h>
+
+and you'll also want to change your namespace to 'cv' (for the uninitiated, add 'using namespace cv;' to the bottom of your preamble). If you've followed this tutorial so far, you won't have used anything that will be affected by this. If you've played the loose cannon, and at compile you get an error along the lines of 'TYPE does not exist in this namespace', then add 'std::' in front of the offending declaration.
+
+Right at the top of your mexFunction, you'll want to create a matrix to store your snapshots in, using a type from namespace CV:
+
+Mat frame(CAPTURE_HEIGHT, CAPTURE_WIDTH,CV_8UC3);
+
+Because it's a computer vision library, it assumes every object in a matrix is an image, and so the third argument it takes tells it you're after a Mat with 8 bits per channel, and 3 channels. note the non-standard syntax it takes - 'frame' is the name of the Mat, but it's called like a function!
+
+Now we don't need to do anything else until our camera has captured the image data:
+
+IplImage* tmpImg = cvCreateImage(cvSize(pXPos, pYPos), IPL_DEPTH_8U,3); 
+tmpImg->imageData = m_pcImageMemory;
+frame = cv::cvarrToMat(tmpImg);
+
+If you care about what this code does, then feel free to look it up! I think the 'cv::' is unnecessary, but there's no harm in leaving it in. Now you have either the choice of saving the image, or displaying it. Unfortunately, there's not any facility I've found yet to pass an image back to matlab directly (please let me know if you find one), so I'd prefer to save it to disk, but I'll cover both here. Firstly, saving the file to disk:
+
+imwrite("image.jpg",frame);
+
+Here, 'image.jpg' is the name of the file to be written to the same directory as the program is runing from (which will be your matlab active folder when calling the file from there). You can choose from several popular image formats, though jpeg and tiff are probably the most useful. It is trivial to read image files back into matlab - if you don't know how, then I'd probably go as far as to say that this tutorial probably isn't for you. (hint: imread('filename');)
+
+Alternatively:
+
+imshow("Image",frame);
+waitKey(0);
+
+This opens a window called 'Image', and displays 'frame' in it. The wait command means that the program pauses until the window is closed, preventing the program from exiting and purging the memory while it's still being displayed (while this wouldn't be an issue in something like java, which implements garbage collection, C++ leaves memory [mis]management to the user).
+
+*
+
+Compiling using OpenCV.
+
+If you take the time to read the official OpenCV documentation, they tell you to use a compiler that they provide template files for already, but that's not feasible (while it is possible to use a compiler outside of matlab to compile mex files, it's a bigger world of pain than trying to use Windows 8) if we're restricting ourselves to matlab. Compiling mex files outside of matlab is covered under 'Advanced Features' at the bottom of this tutorial.
+
+You need to add some more compiler arguments in matlab after 'mex FILENAME.cpp -lueye_api', or more specifically:
+
+-I/usr/local/include/opencv -I/usr/local/include/opencv2 -L/usr/local/lib/ -g -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_ts
+
+It's a bit of a joke, and a massive faff to type out every time. I recommend you make yourself an m-file in matlab such that all you have to change to compile different mex files is the filename. Alternatively, if your code is to be used on different platforms, it might make sense to write the compile commands into your wider matlab codebase so they compile every time you run the matlab function (it has a minimal time overhead unless you have many very complex mex files), as it means that your files will always work (if the machine has the correct libraries installed).
+
+
+***********************
+4. Video Capture
+***********************
+
+Capturing video using the camera is slightly more complex - the simplest way is to save a string of image files, and then stitch them back into a video in Matlab - that's the method that will be covered here.
+
+Proceed as before, by setting the camera handle and initialising the camera. However, since we want to be able to control video capture from the computer, the next thing we need to do is set the camera triggering. Capture of a video frame wants to be arbitrated by the computer, so we want something like:
+
+if (is_SetExternalTrigger(hCam, IS_GET_EXTERNALTRIGGER) != IS_SET_TRIGGER_SOFTWARE){
+	int nTrig = is_SetExternalTrigger(hCam, IS_SET_TRIGGER_SOFTWARE);
+}
+
+Which queries the current triggering settings, and then changes them if necessary.
+
+If you are using a USB3 camera, your interface should be fast enough to transfer images as fast as the camera can capture them; in this case you'll benefit most from setting the pixel clock as high as it goes. If you have a slower camera, then you may want to play with the pixel clock settings for your specific application. In general, the higher the pixel clock, the higher the framerate you can capture, but the higher the likelihood you'll drop some frames. The pixel clock can easily be set to its maximum as follows:
+
+UINT nRange[3];
+ZeroMemory(nRange,sizeof(nRange));
+int nClock = is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_RANGE, (void*)nRange, sizeof(nRange));
+UINT nMax = nRange[1];
+int nClockSet = is_PixelClock(hCam, IS_PIXELCLOCK_CMD_SET, (void*)&nMax, sizeof(nMax));
+
+This method will get the camera to return a 3-element array containing [0]:Minimum clock setting, [1]:Maximum clock setting, and [2]:Minimum increment for clock setting. Obviously, in this example, the clock is just set to the highest returned value.
+
+The length of video recorded will be determined by the framerate, and the number of frames. Both of these should be passed from matlab in the usual way, via prhs[]. It will henceforth be assumed that 'frame_count' and 'NewFPS' correspond to these two values. Everything else that was initialised for the single frame capture (other than the memory allocation) should be run here.
+
+*
+
+Now we need to set the framerate. The uEye camera can very rarely set the exact framerate that you specify, so it is also important for scientific purposes to know the exact rate at which the camera is running. The following code will do the trick:
+
+double ActualFPS;
+INT frameset = is_SetFrameRate(hCam, NewFPS, &ActualFPS);
+
+So we make a new variable to hold the actual framerate the camera has been set to run at, and then pass is to the frame-rate setting function as a reference to be populated by the camera. It will probably be sensible to pass this back to matlab for further processing of the video data.
+
+Note that if you attempt to set a framerate that's above the maximum supported, you will not receive an error, the camera will just respond by setting it as high as possible given the other contraints (exposure and pixel clock).
+
+*
+
+Now we need to allocate memory. If your computer is short on RAM, then you need to be careful - this method is the simplest, but does mean that you need sufficient RAM to hold the entire video sequence in - with a colour camera with a large field of view, each frame may take upwards of 5MB. I'll break the necessary code into chunks:
+
+char *pFrameBuffer[frame_count];
+INT pFrame[frame_count];
+is_ClearSequence (hCam);
+
+First we declare an array of chars, one char per frame to be captured. We also declare an accompanying array of memory IDs, of type int. Then we tell the camera to clear any previous sequence it may have been holding.
+
+for (int i = 0; i < frame_count;i++){
+	int nAlloc = is_AllocImageMem (hCam, pXPos, pYPos, 24, &pFrameBuffer[i], &pFrame[i]);
+	int nSeq = is_AddToSequence(hCam, pFrameBuffer[i], pFrame[i]);
+	pFrame[i] = i + 1;
+}
+
+Then we iterate over the number of frames we want in our sequence, each time allocating some memory to successive chars, and also adding new IDs into our identifiers. Then we add them to the sequence of memory addresses to be recognised by the camera. Please note, this isn't the fastest way of doing this - it can take several seconds to allocate sufficient memory for a large video capture, and so this method isn't suited to applications where it is critical that video capture should commence as soon as possible.
+
+It is noteable that this approach can use a large amount of memory, and due to the rate at which data needs to be written for higher-frame-rate capture, it is advisable not to run on swap - this can cause a buffer over-run (where the buffer in the camera that holds images until such a time as the computer is ready to receive them runs out of memory to hold frames in and will start dropping them). It might be helpful to do a back-of-the-envelope calculation of bits per channel x number of channels x number of pixels x number of frames to work out a sensible maximum number of frames that your hardware can safely capture, and thereby code in a hard limit. If you're a lot better at C++ than me, you could even dynamically calculate the maximum number of frames based on the amount of currently available memory.
+
+*
+
+Next, we tell the camera to start capturing in free-run mode:
+
+int nCap = is_CaptureVideo(hCam, IS_WAIT);
+
+...and initialise the image queue for the images to end up in:
+
+int nInit = is_InitImageQueue(hCam, 0);
+char *pBuffer = NULL;
+INT nMemID = 0;
+
+Now we go about writing the captured images to memory as the camera sends them to the computer:
+
+int k = 0;
+while (k < frame_count){
+	int nBuffer = is_WaitForNextImage(hCam, 1000, &pBuffer, &nMemID);
+	k++;
+}
+
+You could do this with a for loop instead if you wish - the difference is minimal (I think). It is obvious that the program waits for the camera to send an image, puts it in the correct buffer, and then advances to the next buffer to write to.
+
+*
+
+Thus far, we have a load of raw image data stored in RAM, and this needs writing to disk somehow. We'll save it as a stack of .tif files - they're uncompressed, so very little information will be lost. Once again, we'll make use of OpenCV, only this time we'll need to put the image-writer into a loop as follows:
+
+k=0;
+while (k < frame_count){
+	IplImage* tmpImg = cvCreateImage(cvSize(pXPos, pYPos), IPL_DEPTH_8U,3); 
+	tmpImg->imageData = pFrameBuffer[k];
+	frame = cv::cvarrToMat(tmpImg);
+//convert k to a string so images may be labelled
+	std::ostringstream strs;
+	strs << k;
+	std::string str = strs.str();//str is the name of the new string
+//append this to a filestub
+	std::string stub = "image";
+	std::string extension = ".tif";
+	std::string filename = stub + str + extension;
+//write actual file
+	imwrite(filename,frame);
+	k++;
+}
+
+As you should be able to see, this iterates through the memory addresses of progressive frames, and for each one writes a .tif file called 'image' followed by the frame number. Obviously you can change this for your own purposes with your own filestub. OpenCV supports many different image formats; it autodetects the file extension, so you just need to change that. I put some comments in this snipped, to make sure it was obvious which bits of code do what. In order for this to work, we also need to include 'string' and 'string.h' in our preamble.
+
+Now we just need to clear all the memory we used. This doesn't appear to be as simple as it would be nice if it was:
+
+is_ClearSequence (hCam);
+is_UnlockSeqBuf(hCam, nMemID, pBuffer);
+int nSeq2 = is_ClearSequence(hCam);
+k=0;
+while (k < frame_count){
+	int fMem = is_FreeImageMem(hCam, pFrameBuffer[k], pFrame[k]);
+	k++;
+}
+int fMem2 = is_FreeImageMem (hCam, (char*) &pFrameBuffer, *pFrame);
+
+Without going into detail about what all this gubbins does, it doesn't seem to properly clear the memory - it remains under the control of matlab and isn't released back again to the wider system. However, it is available for future mexFunction calls - if you run the same capture proceedure twice, the second time it won't appear to use any additional memory. The reasons for this aren't altogether clear, though. Could be some incompatibilities between the uEye API and matlab's implementation of memory management with mex.
+
+*
+
+Now you just need to convert your stack of .tif images into a video file. We'll do this in Matlab. We'll assume your mexfile has been compiled and is now available as a matlab function. Something like the following should do the trick:
+
+%call whatever your mexfunction is...
+frame_rate = mexFunction(args[]);
+%initialise a new video
+vid = VideoWriter('filename.avi');
+vid.FrameRate = frame_rate;
+vid.Quality = 100;
+%open it
+open(vid);
+for i = 0 : frames-1
+	%read your image files
+	img = imread(strcat('image',num2str(i),'.tif'));
+	%add them to your video file
+	writeVideo(vid,img);
+	%and delete the original image file
+	delete(strcat('image',num2str(i),'.tif'));
+end
+
+'frames' is referring to the number of frames captured. This code will also delete all your intermediate image files. Your remaining file will be an uncompressed .avi video file in your matlab active directory.
+
+There you have it!
+
+***********************
+5. Advanced Features
+***********************
+
+------------------------
+Higher Framerates
+------------------------
+
+It is possible to achieve higher framerates with many uEye cameras if a smaller area is imaged. Certainly for our camera (UI-324 series) the following is true.
+
+In general, the rate at which the camera can capture data is restricted by several things: the rate of data connection to the computer; the rate at chich the camera can read out lines of image; the number of lines in the image. It turns out that for the USB3.0 connection we're using, capturing 24-bit colour images, the bottleneck is the rate at which lines of image may be read from the image sensor. This has an important effect: the highest framerates achievable by the camera can be achieved while maintaining the full width of the sensor (1280 pix), but only reading out 4 lines. In this way, we have managed to far surpass the 229fps limit that the camera is specified to. However, a word of caution: running the camera at very high framerates does cause the camera to generate a fair amount of heat, and pushing it past the specification framerate for an expended period of time is not something I could at all recommend unless you've installed some custom cooling mechanics (in which case, you'd probably have done better to have purchased a far more expensive camera in the first place).
+
+-----------------------
+Area of interest (AOI)
+-----------------------
+
+In order to set a reduced area of interest (AOI), you need 4 parameters. Firstly, you need an x-y pair describing the corner of your area of interest. The uEye reads this from the top-right corner of the image. Then you need a second x-y pair giving the x-dimension (width) and y-dimension (height) you want your AOI to have. These are stored in a special C++ struct defined by uEye.h, called IS_RECT. You would initialise and populate your IS_RECT as follows:
+
+IS_RECT myNewAOI;
+myNewAOI.s32X = YOUR_X_CO-ORDINATE;
+myNewAOI.s32Y = YOUR_Y_CO-ORDINATE;
+myNewAOI.s32Width = YOUR_X_DIMENSION;
+myNewAOI.s32Height = YOUR_Y_DIMENSION;
+
+All 4 parameters are of type int. It is important to note that different cameras have different requirements on the parameters: ours has a minimum of 4 and increment of 2 for the height, and a minimum of 16 and an increment of 4 for the width. Co-ordinates of the corner have increments of 2 over the entire field of view. It is simple in matlab (or anything else to validate these conditions. Below is some sample matlab code for validating (and correcting) the width:
+
+%make sure it's a multiple of 4
+if rem(width,4) ~= 0
+    while rem(width,4) ~= 0
+        width = width + 1;
+    end
+end
+%and make sure it's larger than the minimum
+if width < 16
+    width = 16;
+end
+
+This is then passed to the camera using the command:
+
+is_AOI(hCam,IS_AOI_IMAGE_SET_AOI,(void*)&myNewAOI,sizeof(myNewAOI));
+
+As usual, this will return an int corresponding to a return type specified in the full manual. It is important to remember that with a reduced AOI, memory pointers must be adjusted to point to a smaller area of memory, and that the conversion from DIB to .tif also needs the dimensions of the image re-specifying.
+
+----------------------
+Multiple AOIs
+----------------------
+
+This feature is useless to us, so I haven't tried implementing it, but the documentation for this is actually rather good, so given what you'll have learned from this tutorial you should be able to work it out for yourself! In essence, all AOIs must share at least one co-ordinate and one dimension with at least one other AOI, so such a feature is not useful for things like adaptive feature-tracking (only recording small parts of the FOV corresponding to multiple independently-moving objects eg following multiple faces).
+
+----------------------
+Ring Buffering
+----------------------
+
+I said earlier that there was a limit on the number of frames that could be captured in a single file. This isn't strictly true, but breaking that limit does require the use of more complex C++. In the 2011 standard for C++, the idea of native multi-threading was introduced. There is plenty of good documentation for this feature available online, but basic ring-buffering requires 2 threads, and proper robust ring-buffering requires 3. The process goes as follows:
+
+1. Allocate a short sequence of buffers as described in the section on video capture.
+
+2. Initialise capture into this sequence
+
+3. Start a second thread that looks for buffers which have been filled with an image, writes that image to a file, and then re-initialised the buffer so it can be written into again.
+
+4. When the original thread (the one writing images into the buffers) gets to the last buffer in the sequence, rather than terminating, it needs to loop back to the first buffer, which has hopefully been emptied by now.
+
+This is quite simple to achieve, but the obvious issue with this is the 'hopefully emptied by now' part - if the images are being captured much faster than they can be written to disk, then some errors are going to start occurring whereby frames are overwritten in memory before they can be written to disk. This is why a third thread is really needed. This third thread needs to monitor the relative rates of frame processing of the original 2 threads, and, if necessary, dynamically insert more buffers into the sequence to allow for any file-lag. This evidently requires the passing of variables between concurrent threads, which is *not* something C++ is particularly good at (that's why concurrent languages like Erlang exist). If you don't have a computer science degree, probably just go out and buy more RAM.
+
+Alternatively, you could buy an SSD, turn off the OS default queue optimisation (under linux, usually CFQ), and set it to noop (no optimisation), and try and ensure that no system processes that are likely to cause disk IO saturation will run. For a USB3 camera, this is probably a safe bet - a modern SSD can write much faster than USB3 can transfer data, so a buffer over-run is unlikely.
+
+----------------------------------
+Compiling milti-threaded mex files
+----------------------------------
+
+There are only certain kinds of argument that mex will allow you to pass to the compiler, and it turns out that if you want to multi-thread, the necessary arguments cannot be passed (at least in R2013a), and either matlab will throw an error that it doesn't know what to do with the argument, or the cmopiler will throw an error saying it doesn't have valid parameters. Luckily there is a workaround.
+
+Firstly, work out which libraries and arguments are disagreeing with matlab. The errors that were being thrown should give you a hint about this. By whatever means necessary, eliminate these from your code temporarily (commenting out both the inclusion and use of the offending components). Then attempt to compile the code in matlab, using 'mex -v' for verbose mode. This should give you a lot of confusing text output to the matlab command prompt. Ignore most of it.
+
+The last few lines of bumf will include two lines starting with 'g++......'. These are the raw commands that matlab is actually sending to the compiler. Copy these out and drop them in an empty text file. Save the file with an arbirtary name, and the extension '.sh'. Modify the commands to include the compiler arguments that were offending matlab before. Then go back into matlab, and replace your 'mex .......' with:
+
+! sh FILENAME.sh;
+
+This will run your shell script to compile your mexfile rather than the dumbed-down matlab version, and will allow you to compile far more complex things, including GUIs using gtk or Qt (matlab doesn't like them). Because you copied the arguments from matlab, it will compile it into a .mexa64 library that exports mexFunction, and matlab can immediately use as if matlab had compiled it itself. The beauty of this approach is it means you can compile mexFunctions on computers that don't have matlab installed - all you need are the right header files and shared libraries, which are simple enough to copy across.
+
+This technique can be applied to many other situations in which it is easier to write a shell script to do something than script matlab to do the same. This can include things involving network directories, anything involving copying or deleting large numbers of files (shell scripts support a far better variety of wildcards), useful functions like scp, dd, etc. Any line of matlab code prefixed by an exclamation mark '!' will be sent to the default root terminal (matlab in linux always runs as root). Because of this, it is always best to run a script rather than a string of terminal commands - most things are terminal-independent, but there are some things that don't carry well betwene different shells (xterm, bash, ksh etc). If you write a file and then call it using sh, you can guarantee that it will behave the same on any linux system with all the requisite commands installed.
+
+***********************
+6. Final notes
+***********************
+
+I hope this saves you a lot of trial and error - had I had such a cribsheet I'd have saved a good several months of incredibly frustrating trial and error. If you appreciate this, then feel free to send donations!
+
+Feel free to redistribute this tutorial as you see fit. It is made available under a GNU General Public License (GPL), full details available here: https://www.gnu.org/licenses/gpl.html
+
+Any code snippets are provided wholly without any kind of warranty, either stated or implied, and the author accepts no responsilility whatsoever for any consequences resulting in the use or misuse of any code.
+
+(c) Sam Thompson 2014 (st643@york.ac.uk)
